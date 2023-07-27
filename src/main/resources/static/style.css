@@ -1,0 +1,52 @@
+.table {
+    border-collapse: collapse; // 1
+border-spacing: 0;
+}
+
+.section {
+    border-top: 1em solid transparent;
+}
+.section::before {
+    height: 1em;
+    display: table-row;
+    content: '';
+}
+.section-step {
+    border-radius: 0.25em; // 1
+box-shadow: 0 0 0 1px #ccc; // 1
+}
+.table {
+    border-collapse: collapse; // 1
+border-spacing: 0;
+}
+
+.section {
+    border-top: 1em solid transparent;
+}
+
+.sideDiv {
+    display: none;
+}
+
+
+
+body {
+    color: crimson;
+    font-size: 5px;
+}
+
+
+#frmo {
+    z-index: 30
+}
+
+#A {
+    position: relative;
+    z-index: 9999;
+}
+
+#B {
+    position: relative;
+    z-index: 500;
+}
+

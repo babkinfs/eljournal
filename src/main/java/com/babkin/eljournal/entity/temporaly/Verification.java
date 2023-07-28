@@ -93,7 +93,7 @@ public class Verification {
                 Firstname firstname = firstnameService.saveIntoFirstname( lineArr[1] );
                 Secondname secondname = secondnameService.findSecondnameByName( lineArr[2] );
                 Lastname lastname = lastnameService.findLastnameByFamily( lineArr[0] );
-                Teacher teacher = new Teacher(firstname, secondname, lastname, null);
+                Teacher teacher = new Teacher(firstname, secondname, lastname, null, lineArr[3].toUpperCase());
                 teacherService.save( teacher );
             }
         }
@@ -113,7 +113,7 @@ public class Verification {
                 Firstname firstname = firstnameService.saveIntoFirstname( lineArr[1] );
                 Secondname secondname = secondnameService.findSecondnameByName( lineArr[2] );
                 Lastname lastname = lastnameService.findLastnameByFamily( lineArr[0] );
-                Teacher teacher = new Teacher(firstname, secondname, lastname, null);
+                Teacher teacher = new Teacher(firstname, secondname, lastname, null, null);
                 teacherService.save( teacher );
             }
         }
@@ -364,10 +364,13 @@ public class Verification {
     }
     public String saveStudentsTeashers(String fileName, Model model, String retName) throws IOException {
         List<String> testGroupp = new ArrayList<>();
-        String role = "TEACHER";
+        String role = "";
+        //String role = "TEACHER";
         int indexLineArr = 3;
-        if (fileName.contains( "Student" )){
-            role = "STUDENT";
+        if (fileName.contains( "Student" )||fileName.contains( "Teacher" )){
+            if (fileName.contains( "Student" )) {
+                role = "STUDENT";
+            }
             indexLineArr = 4;
         }
         String fullFileName = fileName;//UtilsController.getPath() + "\\" + fileName;//"Student.txt";
@@ -375,17 +378,36 @@ public class Verification {
         BufferedReader buffReader = new BufferedReader( new FileReader( new File(fullFileName).getAbsoluteFile()) );
         String format = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
         String[] formatArr = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " ).replace( "#", "" ).split( "~" );
-        String format2 = "";
+        String[] format2Arr = null;
+        String grouppFromFile = "";
+        String yearFromFile = "";
+        String facultatFromFile = "";
+        String formaObuchFromFile = "";
+        String semestrFromFile = "";
         if (fileName.contains( "Student" )) {
-            format2 = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-            format2 = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
+            format = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+            format2Arr = buffReader.readLine().trim().replaceAll("\\s{2,}", " ").substring(1).split("~");
         }
-        while (buffReader.ready()) {
+            while (buffReader.ready()) {
             String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
+            if (line.substring( 0, 1 ).equals( "#" )) {
+                if (fileName.contains( "Student" )) {
+                    //String[] inputArr = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " ).split("#");
+                    String[] inputArr = line.split("#");
+                    grouppFromFile = inputArr[1].substring(0, inputArr[1].indexOf("~"));
+                    yearFromFile = inputArr[2];
+                    facultatFromFile = inputArr[3];
+                    formaObuchFromFile = inputArr[4];
+                    semestrFromFile = inputArr[5];
+                }
+            }
             if ((!line.equals( "" )) && (!line.substring( 0, 1 ).equals( "#" ))) {
                 String[] lineArr = line.split( "~" );
 
-                if (emailDop.contains( lineArr[indexLineArr] )) {
+                if (fileName.contains( "Teacher" )){
+                   role = lineArr[indexLineArr-1].toUpperCase();
+                }
+                    if (emailDop.contains( lineArr[indexLineArr] )) {
                     model.addAttribute( "messageType", "danger" );
                     model.addAttribute( "message", "MainController:" + retName +
                             " : Дублируется адрес почты \"" + lineArr[indexLineArr] + " " + lineArr[0] + " " + lineArr[1]
@@ -401,39 +423,40 @@ public class Verification {
                 //Firstname firstname = firstnameService.findFirstnameByName( lineArr[1] );
                 //Secondname secondname = secondnameService.findSecondnameByName( lineArr[2] );
                 //Lastname lastname = lastnameService.findLastnameByFamily( lineArr[0] );
-                if (lineArr.length > 4) {
-//26 07 2023                    Year year = null;
-//26 07 2023                    if (yearsReal.contains(lineArr[5])) {
-//26 07 2023                        String[] yearArr = lineArr[5].split("-");
-//26 07 2023                        year = yearService.save(yearArr[0], yearArr[1]);//.findByFirstnameyearAndSecondnameyear( yearArr[0], yearArr[1] );
-//26 07 2023                    }
-//26 07 2023                    Facultat facultat = null;
-//26 07 2023                    if ((facsReal.contains(lineArr[6])) && (frmsReal.contains(lineArr[7]))) {
-//26 07 2023                        facultat = facultatService.save(lineArr[6], lineArr[7]);//.findByNameAndForma( lineArr[6], lineArr[7] );
-//26 07 2023                    }
-//26 07 2023                    if ((year != null) && (facultat != null)) {
-//26 07 2023                        //int subgroupp = Integer.parseInt(lineArr[3]);
-//26 07 2023                        String subgroupp = lineArr[3];
-//26 07 2023                        String[] semestrsArr = lineArr[8].split("-");
-//26 07 2023
-//26 07 2023                        String grp = lineArr[4] + "_" + lineArr[3];
-//26 07 2023                        if (!testGroupp.contains(grp)) {
-//26 07 2023                            testGroupp.add(grp);
-//26 07 2023                        }
-//26 07 2023
-//26 07 2023                        if ((!semestrsArr[0].equals("0")) && (semReal.contains(semestrsArr[0]))) {
-//26 07 2023                            saveGroupp(semestrsArr[0], lineArr[4], subgroupp, year, facultat,
-//26 07 2023                                    firstname, secondname, lastname, role, lineArr[9]);
-//26 07 2023                        }
-//26 07 2023                        if ((!semestrsArr[1].equals("0")) && (semReal.contains(semestrsArr[1]))) {
-//26 07 2023                            saveGroupp(semestrsArr[1], lineArr[4], subgroupp, year, facultat,
-//26 07 2023                                    firstname, secondname, lastname, role, lineArr[9]);
-//26 07 2023                        }
-//26 07 2023                    }
-//26 07 2023                    //saveSemestrs( semestrsArr[0], year, firstname, secondname, lastname, facultat, lineArr[3], lineArr[4] );
-//26 07 2023                    //saveSemestrs( semestrsArr[1], year, firstname, secondname, lastname, facultat, lineArr[3], lineArr[4] );
+                if (!grouppFromFile.isEmpty()) {
+
+                    Year year = null;
+                    if (yearsReal.contains(yearFromFile)) {
+                        String[] yearArr = yearFromFile.split("-");
+                        year = yearService.save(yearArr[0], yearArr[1]);//.findByFirstnameyearAndSecondnameyear( yearArr[0], yearArr[1] );
+                    }
+                    Facultat facultat = null;
+                    if ((facsReal.contains(facultatFromFile)) && (frmsReal.contains(formaObuchFromFile))) {
+                        facultat = facultatService.save(facultatFromFile, formaObuchFromFile);//.findByNameAndForma( lineArr[6], lineArr[7] );
+                    }
+                    if ((year != null) && (facultat != null)) {
+                        //int subgroupp = Integer.parseInt(lineArr[3]);
+                        String subgroupp = lineArr[3];
+                        String[] semestrsArr = semestrFromFile.split("-");
+
+                        String grp = grouppFromFile + "_" +  lineArr[3];
+                        if (!testGroupp.contains(grp)) {
+                            testGroupp.add(grp);
+                        }
+
+                        if ((!semestrsArr[0].equals("0")) && (semReal.contains(semestrsArr[0]))) {
+                            saveGroupp(semestrsArr[0], grouppFromFile, subgroupp, year, facultat,
+                                    firstname, secondname, lastname, role, lineArr[4]);
+                        }
+                        if ((!semestrsArr[1].equals("0")) && (semReal.contains(semestrsArr[1]))) {
+                            saveGroupp(semestrsArr[1], grouppFromFile, subgroupp, year, facultat,
+                                    firstname, secondname, lastname, role, lineArr[4]);
+                        }
+                    }
+                    //saveSemestrs( semestrsArr[0], year, firstname, secondname, lastname, facultat, lineArr[3], lineArr[4] );
+                    //saveSemestrs( semestrsArr[1], year, firstname, secondname, lastname, facultat, lineArr[3], lineArr[4] );
                 } else {
-                    Startdata startdata = new Startdata( role, firstname, secondname, lastname, null, "" );
+                    Startdata startdata = new Startdata( role, firstname, secondname, lastname, null, lineArr[4] );
                     startdataService.save( startdata );
                 }
             }

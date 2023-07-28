@@ -1,6 +1,7 @@
 package com.babkin.eljournal.repo;
 
 import com.babkin.eljournal.entity.working.Course;
+import com.babkin.eljournal.entity.working.Teacher;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,14 @@ public interface CourseRepos extends JpaRepository<Course, Long> {
 
     @EntityGraph(attributePaths = { "groupp", "teacher" })
     List<Course> findByTeacher_Id(Long id);
+
+//    List<Course> findAllByTeacherNot_AndNameCourseFull_AndGroupp_Id(
+//            Teacher teacher, String name, Long grouppid);
+//    List<Course> findAllByTeacherNot_AndNameCourseFull_AndGroupp_Id(
+//            Teacher teacher, String name, Long grouppid);
+//    List<Course> findAllByTeacherNotAndNameCourseFullAndGroupp_Id(
+//            Teacher teacher, String name, Long grouppid);
+    List<Course> findAllByTeacher_IdNotAndGroupp_Namegroupp(Long id, String nameGr);
 
     @EntityGraph(attributePaths = { "teacher", "groupp" })
     List<Course> findByGroupp_Id(Long grouppid);

@@ -71,7 +71,11 @@ public class User implements UserDetails {
     }
     public boolean isTeacher(){
 
-        return roles.contains( Role.TEACHER );
+        return roles.contains( Role.TEACHER ) || roles.contains( Role.LECTOR );
+    }
+    public boolean isLector(){
+
+        return roles.contains( Role.LECTOR );
     }
 
     public void setId(Long id) {

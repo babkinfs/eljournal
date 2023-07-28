@@ -14,6 +14,8 @@ public class Teacher {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name="role", length = 10, nullable = false )
+    private String role;
     @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = {CascadeType.ALL})
     @JoinColumn(name = "firstname_id")
     private Firstname firstname;
@@ -39,11 +41,12 @@ public class Teacher {
 
     public Teacher() {
     }
-    public Teacher(Firstname firstname, Secondname secondname, Lastname lastname, User user) {
+    public Teacher(Firstname firstname, Secondname secondname, Lastname lastname, User user, String role) {
         this.firstname = firstname;
         this.secondname = secondname;
         this.lastname = lastname;
         this.user = user;
+        this.role = role;
     }
 
 
@@ -87,4 +90,11 @@ public class Teacher {
         this.user = user;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }

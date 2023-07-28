@@ -6,6 +6,7 @@ import com.babkin.eljournal.entity.working.Teacher;
 import com.babkin.eljournal.repo.CourseRepos;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -44,7 +45,19 @@ public class CourseService {
         if (teacher == null){
             return null;
         }
-        return courseRepos.findByTeacher_Id( teacher.getId() );
+        List<Course> temp = courseRepos.findByTeacher_Id( teacher.getId() );
+        List<Course> temporaly = new ArrayList<>();
+        if (teacher.getRole().equals("LECTOR")) {
+            for (Course c : temp) {
+                List<Course> fff = courseRepos.findAllByTeacher_IdNotAndGroupp_Namegroupp(teacher.getId(), c.getGroupp().getNamegroupp());
+                        //teacher, c.getNameCourseFull(), c.getGroupp().getId());
+                if (fff.size()>0){
+                    temporaly.addAll(fff);
+                }
+            }
+            temp.addAll(temporaly);
+        }
+        return temp;
     }
 
     public List<Course> findByGroupp(Groupp groupp){

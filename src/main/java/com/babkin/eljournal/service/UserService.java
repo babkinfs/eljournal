@@ -90,7 +90,10 @@ public class UserService implements UserDetailsService {
         if (startdata.getRole().equals( "TEACHER" )) {
             Set<Role> roles = new HashSet<Role>();
             roles.add( Role.TEACHER  );
-            //roles.add( Role.STUDENT  );
+            user.setRoles( roles );
+        } else if (startdata.getRole().equals( "LECTOR" )) {
+            Set<Role> roles = new HashSet<Role>();
+            roles.add( Role.LECTOR  );
             user.setRoles( roles );
         } else {
             user.setRoles( Collections.singleton( Role.STUDENT) );
@@ -99,8 +102,9 @@ public class UserService implements UserDetailsService {
         user.setActivationCode( UUID.randomUUID().toString() );
         user.setPassword( passwordEncoder.encode( user.getPassword() ) );
         userRepo.save( user );
-        if (startdata.getRole().equals( "TEACHER" )) {
-            Teacher teacher = new Teacher( startdata.getFirstname(), startdata.getSecondname(), startdata.getLastname(), user );
+        if (startdata.getRole().equals( "TEACHER" ) || startdata.getRole().equals( "LECTOR" )) {
+            Teacher teacher = new Teacher( startdata.getFirstname(), startdata.getSecondname(),
+                    startdata.getLastname(), user, null );
             teacherService.update( teacher );
         } else {
             //Student student = new Student(startdata.getFirstname(), startdata.getSecondname(), startdata.getLastname(),

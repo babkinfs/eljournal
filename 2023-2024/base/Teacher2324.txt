@@ -1,7 +1,7 @@
 # Фамилия~Имя~Отчество
-#string~string~string~string
-Бабкин~Геннадий~Викторович~babkin@kursksu.ru
-Крыжевич~Леонид~Святославович~Kryzhevitch@kursksu.ru
-Лисицын~Александр~Леонидович~LisitcynAL@kursksu.ru
-Гранкин~Александр~Николаевич~Grankin@kursksu.ru
-Лисицын~Валерий~Леонидович~LisitcynVL@kursksu.ru
+#string~string~string~string~string
+Бабкин~Геннадий~Викторович~lector~babkin@kursksu.ru
+Крыжевич~Леонид~Святославович~lector~Kryzhevitch@kursksu.ru
+Лисицын~Александр~Леонидович~teacher~LisitcynAL@kursksu.ru
+Гранкин~Александр~Николаевич~teacher~Grankin@kursksu.ru
+Лисицын~Валерий~Леонидович~teacher~LisitcynVL@kursksu.ru

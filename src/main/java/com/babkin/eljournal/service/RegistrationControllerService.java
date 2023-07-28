@@ -32,7 +32,7 @@ public class RegistrationControllerService {
 
     public void fixage(Startdata startdata, User user){
 
-        Teacher teacher = new Teacher(startdata.getFirstname(), startdata.getSecondname(), startdata.getLastname(), user);
+        Teacher teacher = new Teacher(startdata.getFirstname(), startdata.getSecondname(), startdata.getLastname(), user, "");
         Set<Role> roles = new HashSet<Role>();
         roles.add( Role.TEACHER  );
         roles.add( Role.STUDENT  );

@@ -1,6 +1,7 @@
 
 create table teacher(
       teacher_id bigint not null,
+      role  varchar(10),
       firstname_id bigint,
       lastname_id bigint,
       secondname_id bigint,

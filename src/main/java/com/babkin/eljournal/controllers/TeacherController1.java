@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/teacher1")
-@PreAuthorize( "hasAuthority('TEACHER')" )
+@PreAuthorize( "hasAuthority('LECTOR')" )
 public class TeacherController1 {
     @Value( "${upload.path}" )
     private String uploadPath;
@@ -260,7 +260,7 @@ public class TeacherController1 {
         }
         Teacher teacher = teacherService.findTeacherByUser( user );
         //List<Course> courses = courseService.findByTeacher( teacher );
-        List<Course> courses = courseService.findAll();
+        List<Course> courses = courseService.findByTeacher(teacher);
         model.addAttribute( "courses", courses );
 
         //teacherControllerService.saveStudents();

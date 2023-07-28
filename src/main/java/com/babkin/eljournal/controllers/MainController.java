@@ -30,7 +30,7 @@ public class MainController {
             if (roles.contains( Role.ADMIN ) ) {
                 return "redirect:/main";
             }
-            if (roles.contains( Role.TEACHER ) ) {
+            if (roles.contains( Role.TEACHER ) || roles.contains( Role.LECTOR )) {
                 return "redirect:/teacher1";
             }
             if (roles.contains( Role.STUDENT ) ) {

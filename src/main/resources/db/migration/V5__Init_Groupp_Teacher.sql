@@ -80,6 +80,7 @@ create table course
     name_course_full varchar(255),
     name_course_short varchar(255),
     kolzan int,
+    koltem int,
     groupp_id bigint,
     teacher_id bigint,
     primary key (course_id)

@@ -67,7 +67,8 @@ public class RaspisanieService {
         if (course == null){
             return null;
         }
-        return raspisanieRepos.findAllByCourse_Id(course.getId());
+        Long index = course.getId();
+        return raspisanieRepos.findAllByCourse_Id(index);
     }
     public List<Raspisanie> findByCourseAndLessActiondate(Course course, String actiondate) throws ParseException {
         List<Raspisanie> raspisanieList = findAllByCourse(course);

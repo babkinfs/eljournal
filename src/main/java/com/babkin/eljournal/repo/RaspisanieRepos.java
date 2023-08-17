@@ -3,6 +3,7 @@ package com.babkin.eljournal.repo;
 import com.babkin.eljournal.entity.working.Raspisanie;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,8 +26,11 @@ public interface RaspisanieRepos  extends JpaRepository<Raspisanie, Long> {
 
     @EntityGraph(attributePaths = { "theme", "call" })
     List<Raspisanie> findAllByActiondateAndCourse_Id(String actiondate, Long courseid);
+    //@Query("SELECT e  FROM Raspisanie e order by e.number")
     @EntityGraph(attributePaths = { "theme", "call" })
     List<Raspisanie> findAllByCourse_Id(Long courseid);
+
+
 
     List<Raspisanie> findAllByCourse_IdAndCall_IdAndNumber(Long courseid, Long callid, int number);
 }

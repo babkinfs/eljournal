@@ -32,6 +32,8 @@ public class Course{
 
     @Column(name = "kolzan")
     private int kolzan;
+    @Column(name = "koltem")
+    private int koltem;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = {CascadeType.ALL})
     @JoinColumn(name = "groupp_id")
@@ -108,5 +110,13 @@ public class Course{
 
     public void setKolzan(int kolzan) {
         this.kolzan = kolzan;
+    }
+
+    public int getKoltem() {
+        return koltem;
+    }
+
+    public void setKoltem(int koltem) {
+        this.koltem = koltem;
     }
 }

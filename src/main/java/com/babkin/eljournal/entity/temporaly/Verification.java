@@ -51,13 +51,13 @@ public class Verification {
     private ExerciseService exerciseService;
     @Autowired
     private RaspisanieService raspisanieService;
-    @Autowired
-    private CallService callService;
+    //@Autowired
+    //private CallService callService;
     //public Verification(StandartService standartService){
     //    this.standartService = standartService;
     //}
-//    @Autowired
-//    private CourseService courseService;
+    @Autowired
+    private CourseService courseService;
 //    @Autowired
 //    private UtilsController utilsController;
 
@@ -127,18 +127,24 @@ public class Verification {
 
         Reader reader = new FileReader(filename);
         BufferedReader buffReader = new BufferedReader(reader);
-        String startKolNumb = buffReader.readLine();
+        //String startKolNumb = buffReader.readLine();
         String path = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+        path = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
         String allShablon = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-        Reader reader2 = new FileReader(basePath + "\\" + allShablon);
-        BufferedReader buffReader2 = new BufferedReader(reader2);
-        //Работа с шаблоном общим для курса
-        while (buffReader2.ready()) {
-            String ln = buffReader2.readLine();
-            String line2 = ln.trim().replaceAll("\\s{2,}", " ");
-            Shabloncourse shablonCourse = shablonCourseService.save(line2, modelForStart.getTypeZ(), modelForStart.getCourse());
+        try {
+            Reader reader2 = new FileReader(basePath + "\\" + allShablon);
+            BufferedReader buffReader2 = new BufferedReader(reader2);
+            //Работа с шаблоном общим для курса
+            while (buffReader2.ready()) {
+                String ln = buffReader2.readLine();
+                String line2 = ln.trim().replaceAll("\\s{2,}", " ");
+                Shabloncourse shablonCourse = shablonCourseService.save(line2, modelForStart.getTypeZ(), modelForStart.getCourse());
+            }
+            buffReader2.close();
+        } catch (Exception e){
+            throw new IOException("Verification: makeVarLab: Отсутствует файл " + basePath + "\\" + allShablon);
         }
-        buffReader2.close();
+        int countTheme = 0;
         while (buffReader.ready()) {
             String line0 = buffReader.readLine().trim();
             if (!line0.equals("")) {
@@ -152,6 +158,7 @@ public class Verification {
                     if (modelForStart.getTypeZ().equals("лекция")) {
                         theme = themeService.save(nameTheme, "", number, modelForStart.getTypeZ().substring(0, 3),
                                 "", lineArr[2], modelForStart.getCourse());
+                        countTheme++;
                     } else {
                         String parm = "";
                         if (body.length>1){
@@ -159,6 +166,7 @@ public class Verification {
                         }
                         theme =  themeService.save(nameTheme, "", number, modelForStart.getTypeZ().substring(0, 3),
                                 parm, lineArr[2], modelForStart.getCourse());
+                        countTheme++;
                     }
                     if (lineArr.length > 1) {
                         if (body.length > 1) {
@@ -214,7 +222,9 @@ public class Verification {
             }
         }
         buffReader.close();
-
+        Course course = modelForStart.getCourse();
+        course.setKoltem(countTheme);
+        courseService.updateKolTem(course);
     }
 
     private List<ForLekLab> forLekLab;
@@ -234,9 +244,10 @@ public class Verification {
         fullFileName = "";
         Reader reader = new FileReader( fileName );
         BufferedReader buffReader = new BufferedReader( reader );
-        String startKolNumb = buffReader.readLine();
-        Call call = callService.update(10L, startKolNumb);
+//2023 07 29        String startKolNumb = buffReader.readLine();
+//2023 07 29        Call call = callService.update(10L, startKolNumb);
         String startPath = buffReader.readLine();
+        startPath = buffReader.readLine();
         String templateAddress = buffReader.readLine();
         if (!templateAddress.toLowerCase( Locale.ROOT ).contains( "шаблон" )){
             return "Отстутствует строка шаблона";
@@ -272,7 +283,7 @@ public class Verification {
                     return "Тип занятия должен быть \"лк\" или \"лб\" в строке " + line;
                 }
                 fullFileName = (basePath + "\\" + startPath + "\\" + arr[2]).replaceAll("  ", " ");// + ".docx";
-                if ((fileName.contains("лаб")) && (arr[2].length() > 0)) {
+                if ((fullFileName.contains("лаб")) && (arr[2].length() > 0)) {
                     File file = new File( fullFileName );
                     if (!file.exists()) {
                         return "Отсутствует файл \"" + fullFileName + "\" в строке \"" + line + "\"";
@@ -309,11 +320,17 @@ public class Verification {
                     }
                     int p = 0;
                 }
-                String[] thZ = arr[3].split( "@" );
-                if (thZ.length == 1) {
-                    forLekLab.add( new ForLekLab( arr[0], number, arr[2], thZ[0], "", templateAddress ) );
-                } else if (thZ.length != 0) {
-                    forLekLab.add( new ForLekLab( arr[0], number, arr[2], thZ[0], thZ[1], templateAddress ) );
+                //String[] thZ = arr[3].split( "@" );
+                //if (thZ.length == 1) {
+                //    forLekLab.add( new ForLekLab( arr[0], number, arr[2], thZ[0], "", templateAddress ) );
+                //} else if (thZ.length != 0) {
+                //    forLekLab.add( new ForLekLab( arr[0], number, arr[2], thZ[0], thZ[1], templateAddress ) );
+                //}
+
+                if (zadan.length == 1) {
+                    forLekLab.add( new ForLekLab( arr[0], number, arr[2], zadan[0], "", templateAddress ) );
+                } else if (zadan.length != 0) {
+                    forLekLab.add( new ForLekLab( arr[0], number, arr[2], zadan[0], zadan[1], templateAddress ) );
                 }
             }
         }
@@ -326,6 +343,10 @@ public class Verification {
     }
 
     public List<Exercise> showVarLab(ModelForStart modelForStart){
+        List<Exercise> exerciseList = new ArrayList<>();
+        if (modelForStart.course == null){
+            return exerciseList;
+        }
         Course course = modelForStart.getCourse();
         List<Theme> themeList = themeService.findAllByCourse(course);
         if (themeList.size()==0){
@@ -350,7 +371,7 @@ public class Verification {
         if (startdataList.size()==0){
             return new ArrayList<>();
         }
-        List<Exercise> exerciseList = exerciseService.findAllByTheme_AndStartdata(themeList.get(0), startdataList.get(0));
+        exerciseList = exerciseService.findAllByTheme_AndStartdata(themeList.get(0), startdataList.get(0));
         for (int i=0; i<themeList.size(); i++){
             for (int j=1; j<startdataList.size(); j++){
                 exerciseList.addAll(exerciseService.findAllByTheme_AndStartdata(themeList.get(i), startdataList.get(j)));

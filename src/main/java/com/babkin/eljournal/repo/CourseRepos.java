@@ -35,11 +35,12 @@ public interface CourseRepos extends JpaRepository<Course, Long> {
 //            Teacher teacher, String name, Long grouppid);
     List<Course> findAllByTeacher_IdNotAndGroupp_Namegroupp(Long id, String nameGr);
 
-    @EntityGraph(attributePaths = { "teacher", "groupp" })
+    @EntityGraph(attributePaths = { "teacher", "teacher.firstname", "teacher.secondname", "teacher.lastname", "groupp" })
     List<Course> findByGroupp_Id(Long grouppid);
 
     @EntityGraph(attributePaths = { "groupp", "teacher" })
     @Query("SELECT e  FROM Course e order by e.nameCourseFull")
+//    @Query("SELECT e  FROM Course e order by e.groupp.namegroupp")
     @Override
     List<Course> findAll();
 

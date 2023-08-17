@@ -29,7 +29,11 @@ public class CourseService {
         }
         return null;
     }
-
+    public void updateKolTem(Course course){
+        Course fromDb = findCourseById(course.getId());
+        fromDb.setKoltem(course.getKoltem());
+        courseRepos.saveAndFlush(fromDb);
+    }
     public List<Course> findByGrouppAndTeacher(Groupp group, Teacher teacher){
         if ((group == null) || (teacher == null)){
             return courseRepos.findAll();

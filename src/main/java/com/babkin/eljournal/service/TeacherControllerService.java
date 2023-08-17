@@ -8,6 +8,7 @@ import com.babkin.eljournal.entity.temporaly.DoubleString;
 import com.babkin.eljournal.entity.temporaly.ForTeacherController;
 import com.babkin.eljournal.entity.temporaly.ModelForStart;
 import com.babkin.eljournal.entity.working.*;
+import com.babkin.eljournal.entity.temporaly.QuickSort;
 import com.babkin.eljournal.repo.StartdataRepos;
 import com.babkin.eljournal.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -560,16 +561,16 @@ public class TeacherControllerService {
         }
         subgrouppFind = "0";//
         if (typeZstring.equals("лекция")) {
-            Groupp forFind = groupps.get(0);
-            String grouppName = groupps.get(0).getNamegroupp();
-            if (grouppName.indexOf(".")>=0){
-                grouppName = grouppName.substring(0, grouppName.indexOf("."));
-            }
-            for (int ind = 0; ind < groupps.size(); ind++){
-                if (groupps.get(ind).getNamegroupp().equals(grouppName)){
-                    grouppId = ind;
-                }
-            }
+//2023 07 29            Groupp forFind = groupps.get(grouppId);//получили группу
+//2023 07 29            String grouppName = groupps.get(0).getNamegroupp();//получили группу и подгруппу
+//2023 07 29            if (grouppName.indexOf(".")>=0){
+//2023 07 29                grouppName = grouppName.substring(0, grouppName.indexOf("."));//удалили подгруппу
+//2023 07 29            }
+//2023 07 29            for (int ind = 0; ind < groupps.size(); ind++){
+//2023 07 29                if (groupps.get(ind).getNamegroupp().equals(grouppName)){
+//2023 07 29                    grouppId = ind;
+//2023 07 29                }
+//2023 07 29            }
         } else {
             subgrouppFind = "1";
             if (name.equals("grouppId")) {
@@ -597,6 +598,7 @@ public class TeacherControllerService {
                         break;
                     case 2:
                         semestrId = number;
+                        semestr = getSemestr1(model, semestrId);
                         grouppId = UtilsController.groupIdInit;
                         courseId = UtilsController.courseIdInit;
                         break;
@@ -645,8 +647,7 @@ public class TeacherControllerService {
         int index = 0;
         String baseGroupp = groupps.get(grouppId).getNamegroupp();
         int grouppIdNew = 0;
-        for (
-                Groupp groupp : groupps) {
+        for (Groupp groupp : groupps) {
             grouppsStrings.add(groupp.getNamegroupp());
             String tempSubgrouppFind = groupp.getSubgroupp().getNamesubgroupp();
             String nameGroupp = groupp.getNamegroupp();
@@ -1487,7 +1488,8 @@ public class TeacherControllerService {
             return "Такого круса нет";
         }
         boolean addnewdates = false;
-        raspisanies = raspisanieService.findAllByCourse(course);
+        raspisanies =  raspisanieService.findAllByCourse(course);
+        QuickSort.quickSort(raspisanies, 0, raspisanies.size()-1);
         //teacherControllerService1.findRaspisanie(course, null, null);//raspisanieService.findRaspisaniesByCourse( course );
         //raspisanies = new ArrayList<>();
         if ((raspisanies.size() == 0 && !name.equals("nplanes") && !name.equals("typezId") && !name.equals("semestrId")
@@ -1556,7 +1558,8 @@ public class TeacherControllerService {
                 String[] startKolNumb = buffReader.readLine().trim().split(" ");
 
                 //String[] startKolNumb = callService.findCallById(10L).getName().split(" ");
-                int startIndex = Integer.parseInt(startKolNumb[0]);//Кол-во повторений в первой итерации главного цикла
+                String startKolNmbSt = startKolNumb[0].replace((char) 65279, ' ').trim();
+                int startIndex = Integer.parseInt(startKolNmbSt);//Кол-во повторений в первой итерации главного цикла
                 int firstCount = Integer.parseInt(startKolNumb[1]);// Кол-во итераций главного цикла
                 int secondCount = 0;
                 if (startKolNumb.length > 2) {// Если существует два цикла
@@ -1632,65 +1635,63 @@ public class TeacherControllerService {
     public String fillZadaniya(List<Theme> themeList) throws IOException {
         for (Theme theme : themeList){
             String pathShablon =  getPath(theme.getFileshablon());
-            if (pathShablon.indexOf("не найден!") > 0){
-                return pathShablon;
-            }
-            List<String> keys = new ArrayList<>();
-            Reader reader1 = new FileReader( pathShablon );
-            BufferedReader buffReader1 = new BufferedReader( reader1 );
-            while (buffReader1.ready()) {
-                String line1 = buffReader1.readLine().trim().replaceAll("\\s{2,}", " ");
-                if ((!line1.equals("")) && (!line1.substring(0, 1).equals("#"))) {
-                    while (line1.length()>0) {
-                        int indexStart = line1.indexOf("{") + 1;
-                        int indexEnd = line1.indexOf("}");
-                        if (indexStart == 0){
-                            break;
+            int iii = pathShablon.indexOf("не найден!");
+            if (pathShablon.indexOf("не найден!") < 0) {
+                List<String> keys = new ArrayList<>();
+                Reader reader1 = new FileReader(pathShablon);
+                BufferedReader buffReader1 = new BufferedReader(reader1);
+                while (buffReader1.ready()) {
+                    String line1 = buffReader1.readLine().trim().replaceAll("\\s{2,}", " ");
+                    if ((!line1.equals("")) && (!line1.substring(0, 1).equals("#"))) {
+                        while (line1.length() > 0) {
+                            int indexStart = line1.indexOf("{") + 1;
+                            int indexEnd = line1.indexOf("}");
+                            if (indexStart == 0) {
+                                break;
+                            }
+                            keys.add(line1.substring(indexStart, indexEnd));
+                            line1 = line1.substring(indexEnd + 1);
                         }
-                        keys.add(line1.substring(indexStart, indexEnd));
-                        line1 = line1.substring(indexEnd+1);
                     }
                 }
-            }
-            String pathLab = getPath(
-                    theme.getCourse().getGroupp().getNamegroupp()
-                            + theme.getFileshablon().replace("exercise_", " "));
-            if (pathLab.indexOf("не найден!") > 0){
-                return pathLab;
-            }
-            //if (pathLab.equals("2022-2023\\Osen\\3 к ИВТ\\1 sem lab Sety\\310 seti_lab8.txt")){
-            //    int asdfg=0;
-            //}
-            Reader reader = new FileReader( pathLab );
-            BufferedReader buffReader = new BufferedReader( reader );
-            while (buffReader.ready()) {
-                String line = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-                if ((!line.equals("")) && (!line.substring(0, 1).equals("#"))) {
-                    String[] lineArr = line.split("~");
-                    String[] fio = lineArr[0].split(" ");
-                    if (fio.length < 3){
-                        return "Фамилия Имя Отчетство должны быть представлены полностью в файле: " + pathLab;
-                    }
-                    Firstname firstname = firstnameService.findFirstnameByName(fio[1]);
-                    Secondname secondname = secondnameService.findSecondnameByName(fio[2]);
-                    Lastname lastname = lastnameService.findLastnameByFamily(fio[0]);
-                    Startdata startdata = startdataService.findByFirstname_NameAndSecondname_NameAndLastname_Family(
-                            firstname, secondname, lastname);
-                    //27 11 2022   int i = 1;
-                    for (String parm : keys){
-                        //Exercise exercise = new Exercise(parm, lineArr[i], theme, startdata);
-                        //27 11 2022   exerciseService.save(parm, lineArr[i], theme, startdata);
-                        exerciseService.save(parm, lineArr[1], theme, startdata);
-                        //27 11 2022   i++;
+                String pathLab = getPath(
+                        theme.getCourse().getGroupp().getNamegroupp()
+                                + theme.getFileshablon().replace("exercise_", " "));
+                if (pathLab.indexOf("не найден!") > 0) {
+                    return pathLab;
+                }
+                //if (pathLab.equals("2022-2023\\Osen\\3 к ИВТ\\1 sem lab Sety\\310 seti_lab8.txt")){
+                //    int asdfg=0;
+                //}
+                Reader reader = new FileReader(pathLab);
+                BufferedReader buffReader = new BufferedReader(reader);
+                while (buffReader.ready()) {
+                    String line = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+                    if ((!line.equals("")) && (!line.substring(0, 1).equals("#"))) {
+                        String[] lineArr = line.split("~");
+                        String[] fio = lineArr[0].split(" ");
+                        if (fio.length < 3) {
+                            return "Фамилия Имя Отчетство должны быть представлены полностью в файле: " + pathLab;
+                        }
+                        Firstname firstname = firstnameService.findFirstnameByName(fio[1]);
+                        Secondname secondname = secondnameService.findSecondnameByName(fio[2]);
+                        Lastname lastname = lastnameService.findLastnameByFamily(fio[0]);
+                        Startdata startdata = startdataService.findByFirstname_NameAndSecondname_NameAndLastname_Family(
+                                firstname, secondname, lastname);
+                        //27 11 2022   int i = 1;
+                        for (String parm : keys) {
+                            //Exercise exercise = new Exercise(parm, lineArr[i], theme, startdata);
+                            //27 11 2022   exerciseService.save(parm, lineArr[i], theme, startdata);
+                            exerciseService.save(parm, lineArr[1], theme, startdata);
+                            //27 11 2022   i++;
+                        }
                     }
                 }
+                Writer writer = new FileWriter(pathantwer + "logForLek.txt", true);
+                BufferedWriter bufferedWriter = new BufferedWriter(writer);
+                writer.append(pathLab + "\n");
+                writer.close();
             }
-            Writer writer = new FileWriter(pathantwer + "logForLek.txt", true);
-            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-            writer.append(pathLab + "\n");
-            writer.close();
-
-            int ooo = 0;
         }
         return null;
     }
@@ -1711,14 +1712,15 @@ public class TeacherControllerService {
                 }
             }
         }
-        Comparator<Raspisanie> comp = (a, b) -> {
-            try {
-                return Raspisanie.compare(a,b);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        raspisanieList.sort(comp);
+        //17 08 23 Comparator<Raspisanie> comp = (a, b) -> {
+        //17 08 23     try {
+        //17 08 23         return Raspisanie.compare(a,b);
+        //17 08 23     } catch (ParseException e) {
+        //17 08 23         throw new RuntimeException(e);
+        //17 08 23     }
+        //17 08 23 };
+        //17 08 23 raspisanieList.sort(comp);
+        QuickSort.quickSort(raspisanieList, 0, raspisanieList.size()-1);
 
         return raspisanieList;
     }

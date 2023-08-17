@@ -24,8 +24,9 @@
                 <th>&nbsp;Наименование курса</th>
                 <th>&nbsp;Факультет</th>
                 <th>&nbsp;Группа</th>
-                <th>&nbsp;Подгруппа</th>
+                <!--th>&nbsp;Подгруппа</th-->
                 <th>&nbsp;Тип занятия</th>
+                <th>&nbsp;Кол-во тем</th>
                 <th>&nbsp;Год</th>
                 <th>&nbsp;Семестр</th>
                 <th>&nbsp;Кол-во пар</th>
@@ -42,8 +43,9 @@
                         <td>&nbsp;<a href="/teacher1/viewcourse/${course.getId()}">${course.getNameCourseFull()}</a></td>
                         <td>&nbsp;${course.getGroupp().getFacultat().getName()}</td>
                         <td>&nbsp;${course.getGroupp().getNamegroupp()}</td>
-                        <td>&nbsp;${course.getGroupp().getSubgroupp().namesubgroupp}</td>
+                        <!--td>&nbsp;$ {course.getGroupp().getSubgroupp().namesubgroupp}</td-->
                         <td>&nbsp;${course.getTypeZn(course.getGroupp().getSubgroupp().namesubgroupp)}</td>
+                        <td>&nbsp;${course.getKoltem()}</td>
                         <td>&nbsp;${course.getGroupp().getYear().getFirstnameyear()}-${course.getGroupp().getYear().getSecondnameyear()}</td>
                         <td>&nbsp;${course.getGroupp().getSemestr().getName()}</td>
                         <td>&nbsp;${course.getKolzan()}</td>

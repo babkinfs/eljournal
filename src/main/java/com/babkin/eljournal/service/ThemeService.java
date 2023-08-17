@@ -19,13 +19,17 @@ public class ThemeService {
         if (course == null){
             return null;
         }
-        Theme themeFromDb = themeRepos.findThemeByNametemeAndZadanieAndTypezanAndFileshablonAndFileforstudentAndCourse_Id(
-                nametheme, zadanie, typeZan, fileshablon, fileforstudent, course.getId());
-        if (themeFromDb==null){
-            themeFromDb = new Theme(nametheme, zadanie, number, typeZan, fileshablon, fileforstudent, course);
-            themeFromDb = themeRepos.save( themeFromDb );
+//        Theme themeFromDb = themeRepos.findThemeByNametemeAndZadanieAndTypezanAndFileshablonAndFileforstudentAndCourse_Id(
+//                nametheme, zadanie, typeZan, fileshablon, fileforstudent, course.getId());
+        List<Theme> themeFromDb = themeRepos.findThemesByCourse_IdAndTypezan(course.getId(), typeZan);
+        Theme res = null;
+        if (themeFromDb.size()==0){
+            res = new Theme(nametheme, zadanie, number, typeZan, fileshablon, fileforstudent, course);
+            res = themeRepos.save( res );
+        } else {
+            res = themeFromDb.get(0);
         }
-        return themeFromDb;
+        return res;
     }
 
     public List<Theme> findAllByCourse(Course course){

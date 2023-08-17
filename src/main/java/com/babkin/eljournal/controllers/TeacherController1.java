@@ -544,7 +544,7 @@ public class TeacherController1 {
                 int lenPeriod = Period.getSemestr(periodId);
                 int kolzan = modelForStart.getCourse().getKolzan();
                 boolean ok = false;
-                if (kolzan < Period.getSemestr(Period.getListWeekLength()-1)){
+                if (kolzan <= Period.getSemestr(Period.getListWeekLength()-1)){
                     if (kolzan == lenPeriod) {
                         ok = true;
                     }

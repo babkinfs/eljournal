@@ -40,6 +40,8 @@ public class UtilsController {
     @Value("${base.path}")
     private String basepath;
 
+    @Autowired
+    private CallService callService;
     public String getNameOfFile(int index){
         String[] filenames = new String[]{
                 "Standart",
@@ -116,6 +118,22 @@ public class UtilsController {
         return bindingResult.getFieldErrors().stream().collect( collector );
     }
 
+    public String getTempSemestrName(Groupp groupp){
+        String[] mesats = getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ).split("-");
+        int semestrInYear = 1;
+        if (mesats[1].equals("02") || mesats.equals("03") || mesats.equals("04") || mesats.equals("05") || mesats.equals("06")){
+            semestrInYear = 2;
+        }
+        switch (groupp.getNamegroupp().substring(0,1)){
+            case "1" : break;
+            case "2" : semestrInYear += 2; break;
+            case "3" : semestrInYear += 4; break;
+            case "4" : semestrInYear += 6; break;
+            case "5" : semestrInYear += 8; break;
+        }
+        return Integer.toString(semestrInYear);
+
+    }
     public DateTime getDateFill() {
         return DateTime.now();
     }
@@ -126,7 +144,7 @@ public class UtilsController {
     private Calendar calendar;
     public  String getDataNow(SimpleDateFormat dateFormat){
         calendar = new GregorianCalendar(2022, Calendar.FEBRUARY, 6 );//2  //16  Calendar.SEPTEMBER
-        calendar.set(Calendar.HOUR, 8);//9  13
+        calendar.set(Calendar.HOUR, 11);//8 9 11 13
         calendar.set(Calendar.MINUTE, 42);
         calendar.set(Calendar.SECOND, 12);
         return dateFormat.format(calendar.getTime());
@@ -216,6 +234,15 @@ public class UtilsController {
         return first - second;
     }
 
+    String findeCurrentCall(String timeNow){
+        for (Long i=1L; i<9; i++){
+            Call call = callService.findCallById(i);
+            if (comparison(call.getName(), timeNow) == 0){//Найдено
+                return call.getName();
+            }
+        }
+        return "";
+    }
     public int comparison(String call, String time){
         //-1 до пары
         //0 во время пары

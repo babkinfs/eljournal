@@ -90,7 +90,16 @@ public class TeacherController1 {
                 UtilsController.callIdInit,
                 utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
                 false, teacher, model);
+        List<String> galka = (List<String>) session.getAttribute("galka");
+        if (galka == null ){
+            galka = new ArrayList<>();
+            session.setAttribute("galka", galka);
+        }
+        model.addAttribute("visibleKeep", galka.size()>0);
+//        model.addAttribute("visibleKeep", true);
+
         String dateNow = utilsController.getDataNow(new SimpleDateFormat("dd-MM-yyyy hh:mm"));
+        String[] dateNowArr = dateNow.split(" ");
         model.addAttribute("razdel", "Стартовый");
         model.addAttribute("todir", "baseteacher");
         model.addAttribute("viewcall", true);
@@ -106,8 +115,14 @@ public class TeacherController1 {
         //    } else {
         //    model.addAttribute("baseteachersave", false);
         //}
-        dateNow = utilsController.getDataNow();
-        Groupp groupp = modelForStart.getGroupp();
+        dateNow = dateNowArr[0]; //utilsController.getDataNow();
+
+        Call callNow = callService.findByName(utilsController.findeCurrentCall(dateNowArr[1]));
+        List<Raspisanie> raspisanieList = raspisanieService.findAllRaspisaniesByActiondateAndCall(dateNow, callNow);
+
+        //Предварительно определить расписание
+        Raspisanie currentRaspisanie = raspisanieList.get(0);
+        Groupp groupp = currentRaspisanie.getCourse().getGroupp(); //modelForStart.getGroupp();
         List<Student> studentList = studentControllerService.getStudents(groupp);
         String time = utilsController.getTimeNow();
         model.addAttribute("time", time);
@@ -115,8 +130,8 @@ public class TeacherController1 {
             model.addAttribute("currentRaspisanie", null);
             return "baseteacher";
         }
-        List<Raspisanie> raspisanieList = studentControllerService.getRaspisaniebYGroupp(dateNow, groupp, teacher);
-        Raspisanie currentRaspisanie = studentControllerService.getCurrentRaspisanie(raspisanieList, time);
+        //18 08 2023 List<Raspisanie> raspisanieList = studentControllerService.getRaspisaniebYGroupp(dateNow, groupp, teacher);
+        //18 08 2023 Raspisanie currentRaspisanie = studentControllerService.getCurrentRaspisanie(raspisanieList, time);
         //if (currentRaspisanie != null) {
         //    teacherControllerService1.fillDnevnik(user, model, currentRaspisanie, studentList);
         //}
@@ -126,6 +141,7 @@ public class TeacherController1 {
         if (currentRaspisanie != null) {
             Groupp currentGroupp = currentRaspisanie.getCourse().getGroupp();
             teacherControllerService.fillDnevnik(user, model, currentRaspisanie, studentList);
+            int indexStudentFull = 1;
             for (Student student : studentList) {
                 boolean ok = false;
                 List<Dnevnik> temp = dnevnikService.findAllByRaspisanie_AndStudent(currentRaspisanie, student);
@@ -133,13 +149,22 @@ public class TeacherController1 {
                         || (currentGroupp.getSubgroupp().getNamesubgroupp().equals("0"))){
                     //|| (student.getGroupp().getSubgroupp().getNamesubgroupp().indexOf(".")<0)) {
                     if (!student.getGroupp().getSubgroupp().getNamesubgroupp().equals("0")) {//удаляем студентов изначально в 0 подгруппе
+                        boolean ochnoZaochno = galka.contains(Integer.toString(indexStudentFull));
+                        Dnevnik tempDnevnik = new Dnevnik();
+                        //tempDnevnik.setOchno(ochnoZaochno);
                         if (temp.size() > 0) {
                             dnevnikList.addAll(temp);
+                            tempDnevnik = temp.get(0);
+                            if (!tempDnevnik.isOchno()) {
+                                tempDnevnik.setOchno(ochnoZaochno);
+                            }
                             ok = true;
-                            studentFulls.add(new StudentFull(student, ok, temp.get(0)));
+                            studentFulls.add(new StudentFull(student, ok, tempDnevnik));
                         } else {
                             studentFulls.add(new StudentFull(student, ok, null));
                         }
+                        //studentFulls.add(new StudentFull(student, ok, tempDnevnik));
+                        indexStudentFull++;
                     }
                 }
             }
@@ -163,13 +188,20 @@ public class TeacherController1 {
         //String value = (String) session.getAttribute("startProverka");
         //session.setAttribute("startProverkaNamefile", filenameOut);
         //String nameCheckValue ="";
+        List<String> galka = (List<String>)session.getAttribute("galka");
         String[] indexesString = nameCheckValue.split(",");
         List<Integer> indexesInt = new ArrayList<Integer>();
-        for (String st : indexesString) {
+        //for (String st : indexesString) {
+        //    if (!st.equals("")) {
+        //        indexesInt.add(Integer.parseInt(st));
+        //    }
+        //}
+        for (String st : galka) {
             if (!st.equals("")) {
                 indexesInt.add(Integer.parseInt(st));
             }
         }
+
         List<StudentFull> studentFulls = (List<StudentFull>) session.getAttribute("studentFulls");
         for (int i = 0; i < studentFulls.size(); i++) {
             for (int j = 0; j < indexesInt.size(); j++) {
@@ -185,7 +217,9 @@ public class TeacherController1 {
             }
         }
         //model.addAttribute("baseteachersave", true);
-        //session.setAttribute("baseteachersave", "true");
+        session.setAttribute("baseteachersave", "true");
+        session.setAttribute("galka", new ArrayList<>());
+
         return "redirect:/";
 //        model.addAttribute("aDateTime", utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")));//??calcstd
 //        String time = utilsController.getTimeNow();
@@ -1145,7 +1179,7 @@ public class TeacherController1 {
             User user1 = new User();
             user1.setUsername(startdata.getEmail());
             user1.setPassword("Q!123456q");
-            if (index == 60){
+            if (index == 22){
                 int iiu = 0;
             }
             index++;
@@ -1391,5 +1425,14 @@ public class TeacherController1 {
     @GetMapping("/viewProverka")
     public String viewProverka( @RequestParam String pathstudent){
         return "viewProverka";
+    }
+    @GetMapping("/galka/{st}")
+    public String galka(HttpSession session,  @PathVariable("st") String st){//Галка установлена
+        List<String> galka = (List<String>) session.getAttribute("galka");
+        if (!galka.contains(st)) {
+            galka.add(st);
+        }
+        session.setAttribute("galka", galka);
+        return "redirect:/teacher1";
     }
 }

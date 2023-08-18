@@ -3,7 +3,10 @@ package com.babkin.eljournal.controllers;
 import com.babkin.eljournal.entity.Role;
 import com.babkin.eljournal.entity.User;
 import com.babkin.eljournal.entity.temporaly.Verification;
-import com.babkin.eljournal.service.TeacherControllerService;
+import com.babkin.eljournal.entity.working.Plan;
+import com.babkin.eljournal.entity.working.Student;
+import com.babkin.eljournal.entity.working.Teacher;
+import com.babkin.eljournal.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,7 +14,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 //import org.springframework.webflow.engine.model.Model;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -22,6 +30,14 @@ public class MainController {
     private Verification verification;
     @Autowired
     private TeacherControllerService teacherControllerService;
+    @Autowired
+    private MainControllerService mainControllerService;
+    @Autowired
+    private StudentService studentService;
+    @Autowired
+    private PlanService planService;
+    @Autowired
+    private TeacherService teacherService;
 
     @GetMapping("/")
     public String home(@AuthenticationPrincipal User user){
@@ -98,5 +114,62 @@ public class MainController {
         model.addAttribute("results", res);
         return "generdb";
     }
+    @GetMapping("/raspisanie")
+    public String raspisanieZan(@AuthenticationPrincipal User user, Model model) throws ParseException {
+        mainControllerService.makeRaspisanie(user, model, utilsController.getDataNow());
+        model.addAttribute("aDateTime", utilsController.getDataNow(new SimpleDateFormat("dd-MM-yyyy HH:mm")));
+        String tdate = utilsController.getDataNow();
+        model.addAttribute( "tdate", tdate );
+        if (user != null) {
+            List<Plan> plans = new ArrayList<Plan>();
+            Set<Role> roles = user.getRoles();
+            if (roles.contains( Role.STUDENT )) {
+                Student student = studentService.findByUser( user );
+                model.addAttribute( "student", student );
+                plans = planService.findByActionAndGroupp( tdate, student.getGroupp() );
+            }
+            if (roles.contains( Role.TEACHER ) || (roles.contains( Role.LECTOR ) )) {
+                Teacher teacher = teacherService.findTeacherByUser( user );
+                model.addAttribute( "student", teacher );
+                plans = planService.findByActionAndTeacher_Id( tdate, teacher );
+                model.addAttribute( "plans", plans );
+                for (Plan plan : plans){
 
+                }
+                //teacherControllerService.makeNewModel( model, user, 0, Integer.parseInt( UtilsController.facultatInit ),
+                //        Integer.parseInt( UtilsController.yearInit ),
+                //        UtilsController.semestrInit, Integer.parseInt( UtilsController.groupInit ), UtilsController.courseInit,
+                //        tdate, Integer.parseInt( UtilsController.callInit ), 1l, 2L,
+                //        Integer.parseInt( UtilsController.periodInit ), Integer.parseInt( UtilsController.counterInit ),
+                //        UtilsController.facultatInit, UtilsController.yearInit, UtilsController.semestrInit, UtilsController.groupInit,
+                //        UtilsController.courseInit, UtilsController.callInit, UtilsController.periodInit, UtilsController.counterInit );
+
+            }
+            model.addAttribute( "plans", plans );
+        }
+//        List<Call> calls = callService.findAll();
+//        model.addAttribute( "callid", 1 );
+//        model.addAttribute( "calls", calls );
+        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        model.addAttribute( "timeview", false );
+        return "raspisanie";
+    }
+
+    @PostMapping("/raspisanie")
+    public String raspisanieZan(@AuthenticationPrincipal User user){
+        if (user != null) {
+            Set<Role> roles = user.getRoles();
+            if (roles.contains( Role.ADMIN ) ) {
+                return "redirect:/main";
+            }
+            if (roles.contains( Role.TEACHER ) ) {
+                return "redirect:/teacher";
+            }
+            if (roles.contains( Role.STUDENT ) ) {
+                return "redirect:/student";
+            }
+        }
+        //model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        return "raspisanie";
+    }
 }

@@ -37,6 +37,10 @@ public class Teacher {
         return lastname.getName()+" "+firstname.getName()+" "+secondname.getName();
     }
 
+    public String getFio() {
+        return lastname.getName()+" "
+                +firstname.getName().substring(0,1)+". "+secondname.getName().substring(0,1)+".";
+    }
 
 
     public Teacher() {

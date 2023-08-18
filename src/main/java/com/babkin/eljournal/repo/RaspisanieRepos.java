@@ -14,6 +14,7 @@ public interface RaspisanieRepos  extends JpaRepository<Raspisanie, Long> {
     List<Raspisanie> findRaspisanieByActiondateAndCall_IdAndCourse_Id(String actionDate, Long callId, Long courseid);
     @EntityGraph(attributePaths = { "course", "course.groupp", "course.groupp.subgroupp", "call", "theme" })
     List<Raspisanie> findRaspisaniesByActiondateAndCall_Id(String actionDate, Long callId);
+
     List<Raspisanie> findRaspisaniesByCall_Id(Long callId);
 
     @Override
@@ -22,7 +23,7 @@ public interface RaspisanieRepos  extends JpaRepository<Raspisanie, Long> {
     @Override
     <S extends Raspisanie> S saveAndFlush(S s);
     @EntityGraph(attributePaths = { "call", "theme" })
-    Raspisanie findRaspisanieByTheme_Id(Long themeid);
+    List<Raspisanie> findRaspisanieByTheme_Id(Long themeid);
 
     @EntityGraph(attributePaths = { "theme", "call" })
     List<Raspisanie> findAllByActiondateAndCourse_Id(String actiondate, Long courseid);

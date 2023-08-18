@@ -34,6 +34,9 @@ public class Groupp {
     @JoinColumn(name = "subgroupp_id")
     private Subgroupp subgroupp;
 
+    public String getNamegrouppOunly() {
+        return this.namegroupp;
+    }
 
     public Groupp(){}
     public Groupp(String name, Facultat facultat, Semestr semestr, Year year, Subgroupp subgroupp) {

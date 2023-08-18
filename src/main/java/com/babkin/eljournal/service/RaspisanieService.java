@@ -43,7 +43,7 @@ public class RaspisanieService {
         return null;
     }
 
-    Raspisanie findRaspisanieByTheme(Theme theme){
+    List<Raspisanie> findRaspisanieByTheme(Theme theme){
         return raspisanieRepos.findRaspisanieByTheme_Id(theme.getId());
     }
     public Raspisanie findRaspisaniesByActiondateAndCall(String actionDate, Call call){
@@ -56,6 +56,14 @@ public class RaspisanieService {
         }
         return fromDB.get( 0 );
     }
+    public List<Raspisanie> findAllRaspisaniesByActiondateAndCall(String actionDate, Call call){
+        if (call == null){
+            return null;
+        }
+        List<Raspisanie> fromDB = raspisanieRepos.findRaspisaniesByActiondateAndCall_Id( actionDate, call.getId() );
+        return fromDB;
+    }
+
     public List<Raspisanie> findAllByActiondateAndCourse(String actiondate, Course course){
         if (course == null){
             return null;

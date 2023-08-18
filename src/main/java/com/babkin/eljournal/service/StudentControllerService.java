@@ -43,6 +43,8 @@ public class StudentControllerService {
     @Autowired
     private SubgrouppService subgrouppService;
     @Autowired
+    private SemestrService semestrService;
+    @Autowired
     private FilesForDnevnikService filesForDnevnikService;
     @Autowired
     private TeacherControllerService teacherControllerService;
@@ -74,7 +76,8 @@ public class StudentControllerService {
             for (Course course : courseList) {
                 //List<Theme> tmp = themeService.findAllByCourse(course);
                 Groupp grouppTemp = course.getGroupp();
-                if ((course.getGroupp().getId() == tempGroupp.getId()) || (course.getGroupp().getSubgroupp().getNamesubgroupp().equals("0"))) {
+                if ((course.getGroupp().getId() == tempGroupp.getId())
+                        || (course.getGroupp().getSubgroupp().getNamesubgroupp().equals("0"))) {
                     themeList.addAll(themeService.findAllByCourse(course));
                 }
             }
@@ -82,11 +85,13 @@ public class StudentControllerService {
         List<Raspisanie> raspisanieList = new ArrayList<>();
         String timeNow = utilsController.getTimeNow();
         for (Theme theme : themeList) {
-            Raspisanie raspisanie = raspisanieService.findRaspisanieByTheme(theme);
-            if ((raspisanie != null) && (raspisanie.getActiondate().equals(date))
-                    && (!raspisanieList.contains(raspisanie))
-                    && (utilsController.comparison(raspisanie.getCall().getName(), timeNow) == 0)) {
-                raspisanieList.add(raspisanie);
+            List<Raspisanie> raspisanieListTemp = raspisanieService.findRaspisanieByTheme(theme);
+            for (Raspisanie raspisanie : raspisanieListTemp) {
+                if ((raspisanie != null) && (raspisanie.getActiondate().equals(date))
+                        && (!raspisanieList.contains(raspisanie))
+                        && (utilsController.comparison(raspisanie.getCall().getName(), timeNow) == 0)) {
+                    raspisanieList.add(raspisanie);
+                }
             }
         }
         return raspisanieList;
@@ -186,20 +191,27 @@ public class StudentControllerService {
     }
 
     public List<Student> getStudents(Groupp groupp) {
+        Semestr semestr = semestrService.findByName(utilsController.getTempSemestrName(groupp));
         List<Student> studentList = new ArrayList<>();
 //25 02 2023        if (groupp.getSubgroupp().getNamesubgroupp().equals("0")) {
         Subgroupp subgroupp = null;
         Groupp groupp1 = null;
-        int count = subgrouppService.getCount();
-        for (int i = 0; i < count; i++) {
-            subgroupp = subgrouppService.findSubgrouppByNamesubgroupp(Integer.toString(i));
-            groupp1 = groupService.findGrouppByNamegrouppAndFacultat_AndSemestr_AndYear_AndSubgroupp(
-                    groupp.getNamegroupp(), groupp.getFacultat(), groupp.getSemestr(), groupp.getYear(), subgroupp);
-            if (groupp1 != null) {
-                studentList.addAll(studentService.findByGrouppId(groupp1));
-            }
-        }
+        int countSubgroupp = subgrouppService.getCount();
+        //for (int j = 0; j < 10; j++) {
+        //    Semestr tempSemestr = semestrService.findByName(Integer.toString(j));
+        //    if (tempSemestr != null) {
+                for (int i = 1; i < countSubgroupp; i++) {
+                    subgroupp = subgrouppService.findSubgrouppByNamesubgroupp(Integer.toString(i));
+                    groupp1 = groupService.findGrouppByNamegrouppAndFacultat_AndSemestr_AndYear_AndSubgroupp(
+                            groupp.getNamegrouppOunly(), groupp.getFacultat(), semestr, groupp.getYear(), subgroupp);
+                    if (groupp1 != null) {
+                        //studentList.addAll(studentService.findByGrouppId(groupp1));
+                    }
+                }
+        //    }
         //}
+        //}
+        studentList.addAll(studentService.findByGrouppId(groupp));
         return studentList;
     }
 
@@ -286,27 +298,31 @@ public class StudentControllerService {
     ////Получить инструкцию
     public String getInstruct(Model model, String copied,
                               Student student, Raspisanie currentRaspisanie) throws IOException {
-        String fullnameOriginal = teacherControllerService.getPath(currentRaspisanie.getTheme().getFileforstudent());
-        String fullnameCopied = copied + student.getLastname().getName() + " "
-                + student.getFirstname().getName().substring(0, 1) + ". " + student.getSecondname().getName().substring(0, 1)
-                + ". " + currentRaspisanie.getTheme().getTypezan() + currentRaspisanie.getTheme().getNumber() + " "
-                + currentRaspisanie.getTheme().getNameteme() + ".docx";
+        String fileForStudent = currentRaspisanie.getTheme().getFileforstudent();
+        String fullnameCopied = "";
+        if (!fileForStudent.equals("")) {
+            String fullnameOriginal = teacherControllerService.getPath(fileForStudent);
+            fullnameCopied = copied + student.getLastname().getName() + " "
+                    + student.getFirstname().getName().substring(0, 1) + ". " + student.getSecondname().getName().substring(0, 1)
+                    + ". " + currentRaspisanie.getTheme().getTypezan() + currentRaspisanie.getTheme().getNumber() + " "
+                    + currentRaspisanie.getTheme().getNameteme() + ".docx";
 
-        model.addAttribute("fullnamecopied", fullnameCopied);
-        if (currentRaspisanie.getTheme().getTypezan().equals("лаб")) {
-            //String shablon = teacherControllerService1.getPath(currentRaspisanie.getTheme().getFileshablon());
-            Startdata startdata = startdataService.findByFirstname_NameAndSecondname_NameAndLastname_Family(
-                    student.getFirstname(), student.getSecondname(), student.getLastname());
-            String nameCopied = "uploads/tmp.docx";
-            if (!currentRaspisanie.getTheme().getFileshablon().equals("")) {
-                String nameshablon = teacherControllerService.getPath(currentRaspisanie.getTheme().getFileshablon());
-                updateDocument.fillFromShablon(fullnameOriginal, nameCopied, nameshablon, startdata, currentRaspisanie.getTheme());
-                FileUtils.copyFile(new File(nameCopied), new File(fullnameCopied));// fullnameCopied == куда
+            model.addAttribute("fullnamecopied", fullnameCopied);
+            if (currentRaspisanie.getTheme().getTypezan().equals("лаб")) {
+                //String shablon = teacherControllerService1.getPath(currentRaspisanie.getTheme().getFileshablon());
+                Startdata startdata = startdataService.findByFirstname_NameAndSecondname_NameAndLastname_Family(
+                        student.getFirstname(), student.getSecondname(), student.getLastname());
+                String nameCopied = "uploads/tmp.docx";
+                if (!currentRaspisanie.getTheme().getFileshablon().equals("")) {
+                    String nameshablon = teacherControllerService.getPath(currentRaspisanie.getTheme().getFileshablon());
+                    updateDocument.fillFromShablon(fullnameOriginal, nameCopied, nameshablon, startdata, currentRaspisanie.getTheme());
+                    FileUtils.copyFile(new File(nameCopied), new File(fullnameCopied));// fullnameCopied == куда
+                } else {
+                    FileUtils.copyFile(new File(fullnameOriginal), new File(fullnameCopied));
+                }
             } else {
                 FileUtils.copyFile(new File(fullnameOriginal), new File(fullnameCopied));
             }
-        } else {
-            FileUtils.copyFile(new File(fullnameOriginal), new File(fullnameCopied));
         }
         return fullnameCopied;
     }

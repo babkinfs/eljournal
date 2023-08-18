@@ -6,6 +6,7 @@
 <form id="frm2" method="post" action="/teacher1/checking">
     <input type="hidden" name="nameCheckValue" id="nameCheckValue" />
     <input type="hidden" name="nameNotCheckValue" id="nameNotCheckValue" />
+    <input type="text" name="main" id="main">
     <!--input hidden name="plan" value="1">
     <input hidden name="theme" value="theme">
     <input hidden name="zadanie" value="1">
@@ -20,10 +21,12 @@
         Курс: "${currentRaspisanie.getTheme().getCourse().getNameCourseFull()}"&nbsp;
         Тема: "${currentRaspisanie.getTheme().getNameteme()}"&nbsp;
         ${currentRaspisanie.getTheme().getTypezan()}&nbsp;№${currentRaspisanie.getTheme().getNumber()}&nbsp;
-            <div class="sideDiv" style="display: none">
-            <button val="12qw" id="btnhid2"  class="btn btn-primary" type="submit" >Сохранить</button>
-            </div>
-        <input type="hidden" name="_csrf" value="${_csrf.token}">
+            <!--div class="sideDiv" style="display: none"-->
+                <#if visibleKeep>
+                    <button val="12qw" id="btnhid2"  class="btn btn-primary" type="submit" >Сохранить</button>
+                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                </#if>
+            <!--/div-->
     </div>
     </#if>
     <#if studentFulls??>
@@ -101,6 +104,8 @@
                 if(this.checked){
                     checkValue.push($(this).val());
                     $('.sideDiv').show();
+                    var myref = "/teacher1/galka/"+checkValue;
+                    callNext2(myref);
                 }
                 else
                 {
@@ -111,4 +116,22 @@
             $("#nameNotCheckValue").val(checkNotValue.join(","));
         }
     </script>
+    <script type="text/javascript">
+
+        function callNext2(myref) {
+            var tree = document.createDocumentFragment();
+            var link = document.createElement("a");
+            link.setAttribute("id", "idLinkText");
+            link.setAttribute("href", myref);
+            var div = document.createElement("div");
+            div.setAttribute("id", "id2");
+            tree.appendChild(link);
+            tree.appendChild(div);
+            document.getElementById("main").appendChild(tree);
+            //console.log("a");
+            //console.log($('#idLinkText'))
+            document.getElementById("idLinkText").click();
+        }
+    </script>
+
 </@c.page>

@@ -10,7 +10,7 @@ import java.util.List;
 //@Transactional
 public interface SemestrRepos   extends JpaRepository<Semestr, Long> {
     Semestr findSemestrByName(String namesemestr);
-
+    //Semestr findSemestrById(Long id);
     @Override
     List<Semestr> findAll();
 }

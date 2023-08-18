@@ -543,7 +543,9 @@ public class TeacherControllerService {
 
         List<Year> years = getYear1(model, yearId);
         Year year = years.get(yearId);
-        Semestr semestr = getSemestr1(model, semestrId);
+        List<Groupp> grouppList = groupService.findAll();
+        Groupp groupp1 = grouppList.get(grouppId);
+        Semestr semestr = semestrService.findByName(utilsController.getTempSemestrName(groupp1));
         Facultat facultat = getFacultat1(model, facultatId);
 
         String typeZstring = getTypeZ1(model, typezId);
@@ -1699,15 +1701,17 @@ public class TeacherControllerService {
         List<Theme> themeList = themeService.findAllByCourse(course);
         List<Raspisanie> raspisanieList = new ArrayList<>();
         for (Theme theme : themeList) {
-            Raspisanie raspisanie = raspisanieService.findRaspisanieByTheme(theme);
-            if ((raspisanie != null) && (!raspisanieList.contains(raspisanie))) {
-                if (actionDate == null) {
-                    raspisanieList.add(raspisanie);
-                    //raspisanieList.sort(Comparator<Raspisanie> raspisanie)//
-                } else {
-                    if (raspisanie.getActiondate().equals(actionDate)
-                            && (call == null) || (raspisanie.getCall().getName().equals(call))) {
+            List<Raspisanie> raspisanieListTemp = raspisanieService.findRaspisanieByTheme(theme);
+            for (Raspisanie raspisanie : raspisanieListTemp) {
+                if ((raspisanie != null) && (!raspisanieList.contains(raspisanie))) {
+                    if (actionDate == null) {
                         raspisanieList.add(raspisanie);
+                        //raspisanieList.sort(Comparator<Raspisanie> raspisanie)//
+                    } else {
+                        if (raspisanie.getActiondate().equals(actionDate)
+                                && (call == null) || (raspisanie.getCall().getName().equals(call))) {
+                            raspisanieList.add(raspisanie);
+                        }
                     }
                 }
             }
@@ -1727,7 +1731,8 @@ public class TeacherControllerService {
     public void proverka(Model model, @AuthenticationPrincipal User user, String dttm, String forProverka) throws ParseException {
         String dt = dttm.split(" ")[0];
         String[] dtArr = dt.split("-");
-        String[] yearsString = basepath.split("-");
+        String[] yst = basepath.split("\\\\");
+        String[] yearsString = yst[yst.length-1].split("-");
         Year year = yearService.findByFirstnameyearAndSecondnameyear(yearsString[0], yearsString[1]);
         String[] strArr = null;
         List<Semestr> semArr = new ArrayList<>();
@@ -1742,7 +1747,8 @@ public class TeacherControllerService {
         for (String sm : strArr){
             Semestr ssm = semestrService.findByName(sm);
             if (ssm != null) {
-                groupps.addAll(groupService.findGrouppsByFacultat_AndSemestr_AndYear(facultat, ssm, year));
+                List<Groupp> grouppList = groupService.findGrouppsByFacultat_AndSemestr_AndYear(facultat, ssm, year);
+                groupps.addAll(grouppList);
             }
         }
         List<Course> courseList = new ArrayList<>();
@@ -1757,9 +1763,11 @@ public class TeacherControllerService {
         }
         List<Raspisanie> raspisanieList = new ArrayList<>();
         for (Theme theme : themeList){
-            Raspisanie raspisanie = raspisanieService.findRaspisanieByTheme(theme);
-            if (utilsController.compareDate(raspisanie.getActiondate(), dt) <= 0) {
-                raspisanieList.add(raspisanie);
+            List<Raspisanie> raspisanieListTemp = raspisanieService.findRaspisanieByTheme(theme);
+            for (Raspisanie raspisanie : raspisanieListTemp) {
+                if (utilsController.compareDate(raspisanie.getActiondate(), dt) <= 0) {
+                    raspisanieList.add(raspisanie);
+                }
             }
         }
         List<Dnevnik> dnevnikList = new ArrayList<>();

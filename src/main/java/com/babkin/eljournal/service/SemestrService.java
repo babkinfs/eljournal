@@ -1,6 +1,7 @@
 package com.babkin.eljournal.service;
 
 import com.babkin.eljournal.entity.working.Semestr;
+import com.babkin.eljournal.entity.working.Subgroupp;
 import com.babkin.eljournal.repo.SemestrRepos;
 import org.springframework.stereotype.Service;
 
@@ -31,4 +32,12 @@ public class SemestrService {
     public List<Semestr> findAll(){
         return semestrRepos.findAll();
     }
+    //Semestr findSemestrById(Semestr semestr){
+    //    return semestrRepos.findSemestrById(semestr.getId());
+    //}
+    //public int getCount(){
+    //    List<Semestr> list = semestrRepos.findAll();
+    //    return list.size();
+    //}
+
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 //import org.springframework.webflow.engine.model.Model;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.text.ParseException;
@@ -170,6 +171,27 @@ public class MainController {
             }
         }
         //model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        return "raspisanie";
+    }
+    @GetMapping("/calraspisanie/{aDateTime}")
+    public String calraspisanie(@PathVariable("aDateTime") String aDateTime,
+                                Model model, @AuthenticationPrincipal User user){
+        mainControllerService.makeRaspisanie(user, model, aDateTime);
+        model.addAttribute("aDateTime", utilsController.getDataNow(new SimpleDateFormat("dd-MM-yyyy HH:mm")));
+        //List<Plan> plans = null;
+        //String studentName = null;
+        //Student student = studentService.findByUser( user );
+        //if (student == null){
+        //    Teacher teacher = teacherService.findTeacherByUser( user );
+        //    studentName = teacher.getFullFio();
+        //    plans = planService.findByActionAndTeacher_Id( aDateTime, teacher );
+        //} else {
+        //    studentName = student.getFullFio();
+        //    plans = planService.findByActionAndGroupp( aDateTime, student.getGroupp() );
+        //}
+        //model.addAttribute( "plans", plans );
+        //model.addAttribute( "timeview", false );
+        //model.addAttribute( "student", studentName );
         return "raspisanie";
     }
 }

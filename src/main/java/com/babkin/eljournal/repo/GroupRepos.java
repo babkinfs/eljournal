@@ -26,7 +26,9 @@ public interface GroupRepos extends JpaRepository<Groupp, Long> {
             Long facultatid, Long semestrId, Long yearid, Long subgrouppid);
 
     @EntityGraph(attributePaths = { "facultat", "semestr", "year", "subgroupp" })
-    List<Groupp> findAllByNamegroupp(String nameGroup);
+    //List<Groupp> findAllByNamegroupp(String nameGroup);
+    //List<Groupp> findAllByNamegrouppAndAndSemestr_IdOrderByNamegroupp(String nameGroup, Long semestrId);
+    List<Groupp> findAllByNamegrouppAndSemestr_IdOrderBySubgrouppAsc(String nameGroup, Long semestrId);
 
     Groupp findGrouppBySubgroupp_NamesubgrouppAndFacultat_IdAndSemestr_IdAndYear_IdAndNamegroupp(
             String nameSubgroupp, Long facultatid, Long semestrId, Long yearid, String nameGroupp);

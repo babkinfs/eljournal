@@ -1,0 +1,8 @@
+@ Фамилия~Имя~Отчество
+@string~string~string~string~string
+Бабкин~Геннадий~Викторович~lector~babkin@kursksu.ru
+Крыжевич~Леонид~Святославович~lector~Kryzhevitch@kursksu.ru
+Лисицын~Александр~Леонидович~teacher~LisitcynAL@kursksu.ru
+Гранкин~Александр~Николаевич~teacher~Grankin@kursksu.ru
+Юрьев~Иван~Александрович~teacher~YourevIA@kursksu.ru
+Васильев~Денис~Алексеевич~teacher~VasilevDA@kursksu.ru

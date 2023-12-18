@@ -11,5 +11,8 @@
         <#if exerciselist??>
             <@vdt.viewsVarLab exerciselist/>
         </#if>
+        <#if themelist??>
+            <@vdt.viewsThemeList themelist/>
+        </#if>
     </form>
 </@c.page>

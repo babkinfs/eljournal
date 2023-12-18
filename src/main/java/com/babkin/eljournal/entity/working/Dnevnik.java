@@ -18,6 +18,9 @@ public class Dnevnik {
     private boolean ispresent;
     @Column(name = "ochno")
     private boolean ochno;
+    @Transient
+    @Column(name = "visiblebuttons")
+    private boolean visiblebuttons;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = {CascadeType.ALL})
     @JoinColumn(name = "student_id")
@@ -92,5 +95,17 @@ public class Dnevnik {
 
     public void setOchno(boolean ochno) {
         this.ochno = ochno;
+    }
+
+    public boolean isVisiblebuttons() {
+        String fileForStudent = raspisanie.getTheme().getFileforstudent().substring(0,1);
+        if (!fileForStudent.equals("п") && !fileForStudent.equals("д")){
+            return true;
+        }
+        return false;
+    }
+
+    public void setVisiblebuttons(boolean visiblebuttons) {
+        this.visiblebuttons = visiblebuttons;
     }
 }

@@ -56,14 +56,15 @@ public class StudentControllerService {
     //Получить расписание для студентов заданной группы на текущую дату
     public List<Raspisanie> getRaspisaniebYGroupp(String date, Groupp groupp, Teacher teacher) throws ParseException {
         //grouppListAll список подгрупп одной группы
-        List<Groupp> grouppListAll = groupService.findGrouppByNameGroupp(groupp.getOnlynamegroupp());
+        List<Groupp> grouppListAll = groupService.findGrouppByNameGroupp(groupp.getOnlynamegroupp(), groupp.getSemestr());
         List<Course> courseList = new ArrayList<>();
         if (groupp != null) {
-            List<Groupp> grouppList = new ArrayList<>();
-            for (int i = 0; i < grouppListAll.size(); i++) {
-                grouppList.addAll(getAllGroupps(grouppListAll.get(i)));
-            }
-            for (Groupp groupp1 : grouppList) {
+            //List<Groupp> grouppList = new ArrayList<>();
+            //for (int i = 0; i < grouppListAll.size(); i++) {
+            //    grouppList.addAll(getAllGroupps(grouppListAll.get(i)));
+            //}
+            //for (Groupp groupp1 : grouppList) {
+            for (Groupp groupp1 : grouppListAll) {
                 //List<Course> tmpc = courseService.findByGroupp_Id(groupp1);
                 courseList.addAll(courseService.findByGroupp(groupp1));
             }
@@ -88,8 +89,8 @@ public class StudentControllerService {
             List<Raspisanie> raspisanieListTemp = raspisanieService.findRaspisanieByTheme(theme);
             for (Raspisanie raspisanie : raspisanieListTemp) {
                 if ((raspisanie != null) && (raspisanie.getActiondate().equals(date))
-                        && (!raspisanieList.contains(raspisanie))
-                        && (utilsController.comparison(raspisanie.getCall().getName(), timeNow) == 0)) {
+                        && (!raspisanieList.contains(raspisanie)) ){
+                        //&& (utilsController.comparison(raspisanie.getCall().getName(), timeNow) == 0)) {
                     raspisanieList.add(raspisanie);
                 }
             }
@@ -97,14 +98,16 @@ public class StudentControllerService {
         return raspisanieList;
     }
 
-    public Raspisanie getCurrentRaspisanie(List<Raspisanie> raspisanieList, String time) {
+    public Raspisanie getCurrentRaspisanie(List<Raspisanie> raspisanieList, String time, Groupp groupp) {
         Raspisanie currentRaspisanie = null;
         for (Raspisanie raspisanie : raspisanieList) {
             String para = raspisanie.getCall().getName();
             //-1 до пары   0 во время пары   +1 после пары
             int tester = utilsController.comparison(para, time);
             if (tester == 0) {
-                currentRaspisanie = raspisanie;
+                if (raspisanie.getCourse().getGroupp().equals(groupp)) {
+                    currentRaspisanie = raspisanie;
+                }
             }
         }
         return currentRaspisanie;
@@ -126,11 +129,14 @@ public class StudentControllerService {
         //baseGroupp.getNamegroupp().substring(0, baseGroupp.getNamegroupp().indexOf(".")));
         //List<Raspisanie> raspisanieList1 = getRaspisaniebYGroupp(date, groupp, null);
         //raspisanieList.addAll(raspisanieList1);
-        Raspisanie currentRaspisanie = getCurrentRaspisanie(raspisanieList, time);
+        Raspisanie currentRaspisanie = getCurrentRaspisanie(raspisanieList, time, student.getGroupp());
         List<DnevnikAndFilesForDnevnik> dnevnikList = null;
         List<FilesForDnevnik> listOtpravOtv = new ArrayList<>();
         FilesForDnevnik filesForDnevnik = null;
         if (currentRaspisanie != null) {
+            if (currentRaspisanie.getTheme().getFileforstudent().length()==0){
+                int ooo=0;
+            }
             Dnevnik dnevnik = dnevnikService.addDnevnik(true, student, currentRaspisanie);
             model.addAttribute("dnevnik", dnevnik);
             //получить список (старых) расписаний меньше текущего
@@ -141,11 +147,12 @@ public class StudentControllerService {
             for (Raspisanie rasp : smallRaspisanie) {
                 List<Dnevnik> dnevnikList1 = dnevnikService.findAllByRaspisanie_AndStudent(rasp, student);
                 String nameCallFromRasp = rasp.getCall().getName();
-                if ((dnevnikList1.size() > 0) && (utilsController.comparison(nameCallFromRasp, time) == 0)) {
+//23 08 2023                 if ((dnevnikList1.size() > 0) && (utilsController.comparison(nameCallFromRasp, time) == 0)) {
+                if (dnevnikList1.size() > 0){
                     dnevnik = dnevnikList1.get(0);
 //                Dnevnik dnevnik = dnevnikService.addDnevnik(false, student, rasp);
                     filesForDnevnik = filesForDnevnikService.findeFilesForDnevnikAndKtocdal(FilesForDnevnikEnum.студент_сдал, dnevnik);
-                    if (filesForDnevnik != null && filesForDnevnik.getOcenka() != null && filesForDnevnik.getOcenka().equals("Проверено, замечаний нет.")) {
+                    if (filesForDnevnik != null && (filesForDnevnik.getOcenka() != null && filesForDnevnik.getOcenka().equals("Проверено, замечаний нет."))) {
                         dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, filesForDnevnik));
                         if (filesForDnevnik.getStatus().equals("отправил студенту")){
                             listOtpravOtv.add(filesForDnevnik);
@@ -155,9 +162,11 @@ public class StudentControllerService {
                         String subGrouppStudent = student.getGroupp().getSubgroupp().getNamesubgroupp();
                         //String subGrouppFilesForDnevnik = filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getSubgroupp().getNamesubgroupp();
                         String subGrouppFilesForDnevnik = dnevnik.getRaspisanie().getCourse().getGroupp().getSubgroupp().getNamesubgroupp();
-                        if ((subGrouppFilesForDnevnik.equals(subGrouppStudent)) || (subGrouppFilesForDnevnik.equals("0"))) {
+                        //18 08 23  if ((subGrouppFilesForDnevnik.equals(subGrouppStudent)) || (subGrouppFilesForDnevnik.equals("0"))) {
+                        if (dnevnik.isVisiblebuttons() || dnevnik.getRaspisanie().getActiondate().equals(date)) {
                             dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, null));
                         }
+                        //18 08 23  }
                     }
                 }
             }
@@ -328,7 +337,7 @@ public class StudentControllerService {
     }
     ////Отправить файл
     public String getFile(int btn_out, Student student, Raspisanie currentRaspisanie, String nn_po_poryadku,
-                          MultipartFile fullnamecop, List<Dnevnik> dnevnikList) throws IOException {
+                          MultipartFile fullnamecop, Dnevnik dnevnik) throws IOException {
         //Проверить нужно ли отправлять файл студента
         boolean miss = true;
         List<Dnevnik> dnevniks = dnevnikService.findAllByRaspisanie_AndStudent(currentRaspisanie, student);
@@ -351,7 +360,7 @@ public class StudentControllerService {
                 outfile = resultFileName + ext;
                 fullnamecop.transferTo(new File(outfile));
                 filesForDnevnikService.addFilesForDnevnik(utilsController.getDataNow(), FilesForDnevnikEnum.студент_сдал,
-                        outfile, "создал", dnevnikList.get(btn_out));
+                        outfile, "создал", dnevnik);
             }
         }
         return outfile;

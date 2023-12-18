@@ -127,12 +127,26 @@ public class Verification {
 
         Reader reader = new FileReader(filename);
         BufferedReader buffReader = new BufferedReader(reader);
-        //String startKolNumb = buffReader.readLine();
+        String[] startKolNumb  = buffReader.readLine().trim().replaceAll("\\s{2,}", " ").split(" ");
+        List<Integer> numbersSecond = new ArrayList<>();
+        String startKolNmbSt = startKolNumb[0].replace((char) 65279, ' ').trim();
+        int startIndex = Integer.parseInt(startKolNmbSt);//Кол-во повторений в первой итерации главного цикла
+        int firstCount = Integer.parseInt(startKolNumb[1]);// Кол-во итераций главного цикла
+        int secondCount = 0;
+        int deltaNumber = 0;
+        //if (startKolNumb.length > 2) {// Если существует два цикла
+        //    secondCount = Integer.parseInt(startKolNumb[2]);
+        //}
+        boolean firstSecond = true;
+        int coutnFirstSecond = 2;
+        int numberDouble = 0;
+
         String path = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-        path = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+        int ind = path.lastIndexOf("\\");
         String allShablon = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+        String path2 = basePath + "\\" + path.substring(0, ind) + "\\" + allShablon;
         try {
-            Reader reader2 = new FileReader(basePath + "\\" + allShablon);
+            Reader reader2 = new FileReader(path2);
             BufferedReader buffReader2 = new BufferedReader(reader2);
             //Работа с шаблоном общим для курса
             while (buffReader2.ready()) {
@@ -142,7 +156,7 @@ public class Verification {
             }
             buffReader2.close();
         } catch (Exception e){
-            throw new IOException("Verification: makeVarLab: Отсутствует файл " + basePath + "\\" + allShablon);
+            throw new IOException("Verification: makeVarLab: Отсутствует файл " + path2);
         }
         int countTheme = 0;
         while (buffReader.ready()) {
@@ -164,9 +178,81 @@ public class Verification {
                         if (body.length>1){
                             parm =  body[1];
                         }
-                        theme =  themeService.save(nameTheme, "", number, modelForStart.getTypeZ().substring(0, 3),
-                                parm, lineArr[2], modelForStart.getCourse());
-                        countTheme++;
+                        if (number > firstCount) {
+                            numberDouble = numbersSecond.get(secondCount);
+                            secondCount++;
+                            theme = themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+                            parm, lineArr[2], modelForStart.getCourse());
+                            countTheme++;
+                        } else {
+                            if (startIndex > 0) {
+                                startIndex--;
+                                numberDouble = number;
+                                theme = themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+                                        parm, lineArr[2], modelForStart.getCourse());
+                                countTheme++;
+                            } else {
+                                switch (coutnFirstSecond) {
+                                    case 1:
+                                        numberDouble = number + deltaNumber;
+                                        theme = themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+                                                parm, lineArr[2], modelForStart.getCourse());
+                                        countTheme++;
+                                        break;
+                                    case 2:
+                                        //firstSecond = !firstSecond;
+                                        //coutnFirstSecond = 2;
+                                        numbersSecond.add(number + deltaNumber);
+                                        //coutnFirstSecond--;
+                                        deltaNumber++;
+                                        numberDouble = number + deltaNumber;
+                                        theme = themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+                                                parm, lineArr[2], modelForStart.getCourse());
+                                        countTheme++;
+                                        break;
+                                }
+                                coutnFirstSecond--;
+                                if (coutnFirstSecond == 0) {
+                                    coutnFirstSecond = 2;
+                                }
+                            }
+                        }
+//                            if (firstSecond) {
+//                                if (coutnFirstSecond > 0) {
+//                                    numbersSecond.add(number+deltaNumber);
+//                                    coutnFirstSecond--;
+//                                    deltaNumber++;
+//                                    numberDouble = number+deltaNumber;
+//                                    theme =  themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+//                                            parm, lineArr[2], modelForStart.getCourse());
+//                                    countTheme++;
+//                                } else {
+//                                    firstSecond = !firstSecond;
+//                                    coutnFirstSecond = 1;
+//                                    numberDouble = number+deltaNumber;
+//                                    theme =  themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+//                                            parm, lineArr[2], modelForStart.getCourse());
+//                                    countTheme++;
+//                                }
+//                            } else {
+//                                if (coutnFirstSecond > 0) {
+//                                    numbersSecond.add(number+deltaNumber);
+//                                    coutnFirstSecond--;
+//                                    deltaNumber++;
+//                                    numberDouble = number+deltaNumber;
+//                                    theme =  themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+//                                            parm, lineArr[2], modelForStart.getCourse());
+//                                    countTheme++;
+//                                } else {
+//                                    firstSecond = !firstSecond;
+//                                    coutnFirstSecond = 2;
+//                                    numberDouble = number+deltaNumber;
+//                                    theme =  themeService.save(nameTheme, "", numberDouble, modelForStart.getTypeZ().substring(0, 3),
+//                                            parm, lineArr[2], modelForStart.getCourse());
+//                                    countTheme++;
+//                                }
+//                            }
+//                        }
                     }
                     if (lineArr.length > 1) {
                         if (body.length > 1) {
@@ -211,7 +297,7 @@ public class Verification {
                                 int index = 1;
                                 for (String st : listShablon) {
                                     Exercise exercise = exerciseService.save(st, fromShablon[index], theme, startdata);
-                                    index++;
+                                    index++;//23 08 2023 ошибка с индексом на 17 строке
                                 }
                                 int p = 0;
                             }
@@ -550,22 +636,22 @@ public class Verification {
         String[] formatArr = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " ).replace( "#", "" ).split( "~" );
         while (buffReader.ready()) {
             String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-            if ((!line.equals( "" )) && (!line.substring( 0, 1 ).equals( "#" ))) {
+            if ((!line.equals( "" )) && (!line.substring( 0, 1 ).equals( "@" ))) {
                 String[] lineArr = line.split( "~" );
-                if ((yearsDop.contains( lineArr[2] )) && (!yearsReal.contains( lineArr[2] ))){
-                    yearsReal.add( lineArr[2] );
+                if ((yearsDop.contains( lineArr[3] )) && (!yearsReal.contains( lineArr[3] ))){
+                    yearsReal.add( lineArr[3] );
                 }
-                if ((groupsDop.contains( lineArr[3] )) && (!groupsReal.contains( lineArr[3] ))){
-                    groupsReal.add( lineArr[3] );
+                if ((groupsDop.contains( lineArr[4] )) && (!groupsReal.contains( lineArr[4] ))){
+                    groupsReal.add( lineArr[4] );
                 }
-                if ((semDop.contains( lineArr[5] )) && (!semReal.contains( lineArr[5] ))){
-                    semReal.add( lineArr[5] );
+                if ((semDop.contains( lineArr[6] )) && (!semReal.contains( lineArr[6] ))){
+                    semReal.add( lineArr[6] );
                 }
-                if ((facsDop.contains( lineArr[6] )) && (!facsReal.contains( lineArr[6] ))){
-                    facsReal.add( lineArr[6] );
+                if ((facsDop.contains( lineArr[7] )) && (!facsReal.contains( lineArr[7] ))){
+                    facsReal.add( lineArr[7] );
                 }
-                if ((frmsDop.contains( lineArr[7] )) && (!frmsReal.contains( lineArr[7] ))){
-                    frmsReal.add( lineArr[7] );
+                if ((frmsDop.contains( lineArr[8] )) && (!frmsReal.contains( lineArr[8] ))){
+                    frmsReal.add( lineArr[8] );
                 }
             }
         }
@@ -657,15 +743,17 @@ public class Verification {
     //Сохранение содержимого файла Standart в БД
     public String makeStandart(String nameStandart) throws IOException {
         // =  teacherControllerService1.getPath("Standart2122.txt"  );//UtilsController.getPath() + "\\" + "Standart.txt";
-        Reader reader = new FileReader( nameStandart );
-        BufferedReader buffReader = new BufferedReader( reader );
-        while (buffReader.ready()) {
-            String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-            if (!line.equals( "" )) {
-                //Standart standart = new Standart(line);
-                Standart standart = standartService.save( line );
-                //String[] lineArr = line.split( "~" );
+        if (!nameStandart.contains("не найден")) {
+            Reader reader = new FileReader(nameStandart);
+            BufferedReader buffReader = new BufferedReader(reader);
+            while (buffReader.ready()) {
+                String line = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+                if (!line.equals("")) {
+                    //Standart standart = new Standart(line);
+                    Standart standart = standartService.save(line);
+                    //String[] lineArr = line.split( "~" );
 
+                }
             }
         }
         return nameStandart;
@@ -674,22 +762,29 @@ public class Verification {
     //Сохранение содержимого файла control в памати lexemaDop
     public String makeLexema(String nameStandart) throws IOException {
         // =  teacherControllerService1.getPath("Lexema2122.txt"  );//UtilsController.getPath() + "\\" + "Lexema.txt";
-        Reader reader = new FileReader( nameStandart );
-        BufferedReader buffReader = new BufferedReader( reader );
-        while (buffReader.ready()) {
-            String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-            if (!line.equals( "" )) {
-                lexemaDop.add( line );
-                //Standart standart = new Standart(line);
-                //Standart standart = standartService.save( line );
-                //String[] lineArr = line.split( "~" );
+        if (!nameStandart.contains("не найден")) {
+            Reader reader = new FileReader(nameStandart);
+            BufferedReader buffReader = new BufferedReader(reader);
+            while (buffReader.ready()) {
+                String line = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+                if (!line.equals("")) {
+                    lexemaDop.add(line);
+                    //Standart standart = new Standart(line);
+                    //Standart standart = standartService.save( line );
+                    //String[] lineArr = line.split( "~" );
 
+                }
             }
         }
         return nameStandart;
     }
 
     public String verificateFile(String name, Model model, String retName) throws IOException {
+        if (name.contains("не найден")) {
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", name);
+            return retName;
+        }
         Reader reader = new FileReader( name );
         int startIndex = 3;
         int endIndex = 4;
@@ -707,12 +802,27 @@ public class Verification {
         String frmObuchFromFile = "";
         String semestrFromFile = "";
         BufferedReader buffReader = new BufferedReader( reader );
-        String format1 = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-        format1 = makeFormat(buffReader.readLine(), model, retName, name, "1");
+        String format1 = "";
         String format2 = "";
+        String format3 = "";
+        String format4 = "";
+        String format5 = "";
+        String format6 = "";
+        while ((format1 = buffReader.readLine()).indexOf("@") == 0){
+            format6 = format5;
+            format5 = format4;
+            format4 = format3;
+            format3 = format2;
+            format2 = format1;
+        }
+        String line = format1;
+        //format1 = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
+        if (name.contains( "Course" )) {
+            format1 = makeFormat(format3, model, retName, name, "1");
+        }
         if (name.contains( "Student" )) {
-            format2 = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-            format2 = makeFormat(buffReader.readLine(), model, retName, name, "2");
+            format1 = makeFormat(format4, model, retName, name, "1");
+            format2 = makeFormat(format2, model, retName, name, "2");
         }
                 //makeFormat(String input, Model model, String retName, String name){
         //if (!format1.substring( 0, 1 ).equals( "#" )) {
@@ -721,14 +831,14 @@ public class Verification {
         //            " : Отсутствует шаблон в файле \"" + name + "\"" );
         //    return retName;
         //}
-        String[] formatArr1 = format1.replace( "#", "" ).split( "~" );
-        if (name.contains( "Student" )) {
-            String[] formatArr2 = format2.replace("#", "").split("~");
-        }
+        String[] formatArr1 = format1.replace( "@", "" ).split( "~" );
+        //if (name.contains( "Student" )) {
+        //    String[] formatArr2 = format2.replace("#", "").split("~");
+        //}
         while (buffReader.ready()) {
-            String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
+            //line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
             if (!line.isEmpty()) {
-                if (line.substring(0, 1).equals("#")) {
+                if (line.substring(0, 1).equals("#") && (!line.contains("Осень") && (!line.contains("Весна")))) {
                     String[] arrLine = line.substring(1).split("#");
                     grouppFromFile = arrLine[0].split(" ")[0];
                     yearFromFile = arrLine[1].replace("#", "");
@@ -736,7 +846,7 @@ public class Verification {
                     frmObuchFromFile = arrLine[3];
                     semestrFromFile = arrLine[4];
                     int ooo = 0;
-                } else if (!line.substring(0, 1).equals("#")) {
+                } else if (!line.substring(0, 1).equals("@")) {
                     String[] lineArr = line.split("~");
                     if (name.contains("Student")) {
                         if ((StringUtils.isNumeric(lineArr[0]))
@@ -800,6 +910,7 @@ public class Verification {
                     }
                 }
             }
+            line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
         }
         return null;
     }
@@ -829,7 +940,7 @@ public class Verification {
     }
     private String makeFormat(String input, Model model, String retName, String name, String nmb){
         String format = input.trim().replaceAll( "\\s{2,}", " " );
-        if (!format.substring( 0, 1 ).equals( "#" )) {
+        if (!format.substring( 0, 1 ).equals( "@" )) {
             model.addAttribute( "messageType", "danger" );
             model.addAttribute( "message", "MainController:" + retName +
                     " : Отсутствует шаблон" + nmb + " в файле \"" + name + "\"" );

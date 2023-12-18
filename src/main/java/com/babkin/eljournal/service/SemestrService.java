@@ -30,7 +30,7 @@ public class SemestrService {
     }
 
     public List<Semestr> findAll(){
-        return semestrRepos.findAll();
+        return semestrRepos.findByOrderByNameAsc();
     }
     //Semestr findSemestrById(Semestr semestr){
     //    return semestrRepos.findSemestrById(semestr.getId());

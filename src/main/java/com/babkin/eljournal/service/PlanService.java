@@ -72,7 +72,11 @@ public class PlanService {
         if (groupp == null){
             return null;
         }
-        return planRepos.findPlanByActionAndGroupp_Id(  action, groupp.getId() );
+        if (planRepos.count() > 0) {
+            List<Plan> res = planRepos.findPlanByActionAndGroupp_Id(action, groupp.getId());
+            return res;
+        }
+        return null;
     }
 
     public Optional<Plan> findById(Long planid){

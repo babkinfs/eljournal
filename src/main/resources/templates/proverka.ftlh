@@ -38,7 +38,7 @@
                                            value="${files.getDnevnik().getRaspisanie().getCourse().getNameCourseFull()}" />
                                     <input type="hidden"  name="theme"
                                            value="${files.getDnevnik().getRaspisanie().getTheme().getNameteme()}" />
-                                    <input type="hidden"  name="filesfordnevnik"
+                                    <input type="hidden"  name="lengthfilesfordnevnik"
                                            value="${files.getStringId()}" />
                                     <#if buttonvisible == "true">
                                         <button id="btn_out" name="btn_out" value="${index}"

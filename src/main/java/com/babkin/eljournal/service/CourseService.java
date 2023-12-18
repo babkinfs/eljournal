@@ -4,6 +4,7 @@ import com.babkin.eljournal.entity.working.Course;
 import com.babkin.eljournal.entity.working.Groupp;
 import com.babkin.eljournal.entity.working.Teacher;
 import com.babkin.eljournal.repo.CourseRepos;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.List;
 
 @Service
 public class CourseService {
+    @Autowired
+    private GroupService grouppService;
 
     private final CourseRepos courseRepos;
 
@@ -46,6 +49,7 @@ public class CourseService {
     }
 
     public List<Course> findByTeacher(Teacher teacher){
+        //Выбрать все курсы как преподавателя, так и руковадителя дисциплины
         if (teacher == null){
             return null;
         }
@@ -53,10 +57,16 @@ public class CourseService {
         List<Course> temporaly = new ArrayList<>();
         if (teacher.getRole().equals("LECTOR")) {
             for (Course c : temp) {
-                List<Course> fff = courseRepos.findAllByTeacher_IdNotAndGroupp_Namegroupp(teacher.getId(), c.getGroupp().getNamegroupp());
-                        //teacher, c.getNameCourseFull(), c.getGroupp().getId());
-                if (fff.size()>0){
-                    temporaly.addAll(fff);
+                //Выбираю совокупность группы и подгрупп, отсутствующих у преподавателя и по ним нахожу курсы
+                List<Groupp> listGroupp = grouppService.findGrouppByNameGroupp(
+                        c.getGroupp().getNamegroupp(), c.getGroupp().getSemestr());
+                for (Groupp gr : listGroupp) {
+                    List<Course> fff = courseRepos.findAllByTeacher_IdAndGroupp_Subgroupp_IdAndNameCourseFull(
+                            teacher.getId(), c.getGroupp().getSubgroupp().getId(), c.getNameCourseFull());
+                    //teacher, c.getNameCourseFull(), c.getGroupp().getId());
+                    if (fff.size() > 0) {
+                        temporaly.addAll(fff);
+                    }
                 }
             }
             temp.addAll(temporaly);

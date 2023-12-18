@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -299,6 +300,19 @@ public class TeacherControllerService {
         }
         return facultats.get(facultatId);
     }
+    public Facultat getFacultat2(Model model, int facultatId, Semestr semestr) {
+        List<Facultat> facultats = facultatService.findAll();
+        List<String> facultatsStrings = new ArrayList<>();
+        for (Facultat facultat : facultats) {
+            facultatsStrings.add(facultat.getName() + ", " + facultat.getForma());
+        }
+        if (model != null) {
+            model.addAttribute("facultats", facultatsStrings);
+            model.addAttribute("facultatId", facultatId);
+        }
+        return facultats.get(facultatId);
+    }
+
 
     public Year getYear(Model model, int yearId) {
         List<Year> years = yearService.findAll();
@@ -321,12 +335,24 @@ public class TeacherControllerService {
         }
         return years;
     }
+    public Year getYear2(Model model, int yearId) {
+        List<Year> years = yearService.findAll();
+        List<String> yearsStrings = new ArrayList<>();
+        for (Year year : years) {
+            yearsStrings.add(year.getFirstnameyear() + "-" + year.getSecondnameyear());
+        }
+        if (model != null) {
+            model.addAttribute("years", yearsStrings);
+            model.addAttribute("yearId", yearId);
+        }
+        return years.get(yearId);
+    }
 
     public Semestr getSemestr(Model model, int semestrId) {
         List<Semestr> semestrs = semestrService.findAll();
         if (model != null) {
             model.addAttribute("semestrs", semestrs);
-            model.addAttribute("semestrid", semestrId);
+            model.addAttribute("semestrId", semestrId);
         }
         return semestrs.get(semestrId);
     }
@@ -341,7 +367,7 @@ public class TeacherControllerService {
             model.addAttribute("semestrs", semestrsStrings);
             model.addAttribute("semestrId", semestrId);
         }
-        System.out.println("getSemestr1 semestrId=" + semestrId);
+        //System.out.println("getSemestr1 semestrId=" + semestrId);
         return semestrs.get(semestrId);
     }
 
@@ -358,9 +384,9 @@ public class TeacherControllerService {
     public Groupp getGroupp1(Model model, int grouppId, String typez,
                              Semestr semestr, Year year, Facultat facultat) {
 
-        String subgrouppFind = "0";
+        int subgrouppFind = 0;
         if (!typez.equals("лекция")) {
-            subgrouppFind = "1";
+            subgrouppFind = 1;
         }
         List<Groupp> groupps = null;
         if ((facultat == null) && (semestr == null) && (year == null)) {
@@ -372,22 +398,30 @@ public class TeacherControllerService {
         } else {
             groupps = groupService.findGrouppsByFacultat_AndSemestr_AndYear(facultat, semestr, year);
         }
+        List<Groupp> grouppsOk = new ArrayList<>();
         List<String> grouppsStrings = new ArrayList<>();
         int index = 0;
         int grouppIdNew = 0;
         for (Groupp groupp : groupps) {
-            grouppsStrings.add(groupp.getNamegroupp() + "." + groupp.getSubgroupp().getNamesubgroupp());
-            if (groupp.getSubgroupp().getNamesubgroupp() == subgrouppFind) {
-                grouppIdNew = index;
+            String grouppName = groupp.getNamegroupp();
+            if (((grouppName.indexOf(".") < 0) && (subgrouppFind ==0))
+            || ((grouppName.indexOf(".") >- 0) && (subgrouppFind !=0))){
+            //if (groupp.getSubgroupp().getNamesubgroupp() == subgrouppFind) {
+                grouppsStrings.add(grouppName);// + "." + groupp.getSubgroupp().getNamesubgroupp());
+                grouppsOk.add(groupp);
+                //grouppIdNew = index;
             }
             index++;
+        }
+        if (grouppId >= grouppsOk.size()){
+            grouppId = grouppsOk.size()-1;
         }
         if (model != null) {
             model.addAttribute("groups", grouppsStrings);
             model.addAttribute("grouppId", grouppId);
             model.addAttribute("grouppIdNew", grouppIdNew);
         }
-        return groupps.get(grouppIdNew);
+        return grouppsOk.get(grouppId);
     }
 
     public Subgroupp getSubgroupp1(Model model, int subgrouppId, Groupp groupp) {
@@ -428,6 +462,9 @@ public class TeacherControllerService {
         List<String> coursesStrings = new ArrayList<>();
         for (Course course : courses) {
             coursesStrings.add(course.getNameCourseFull());
+        }
+        if (courseId>=courses.size()){
+            courseId=courses.size()-1;
         }
         if (model != null) {
             model.addAttribute("courses", coursesStrings);
@@ -517,8 +554,71 @@ public class TeacherControllerService {
         }
         model.addAttribute("tdatas", list);
     }
-
     public ModelForStart prepareStart(
+            String name,
+            int number,
+            int periodId,
+            int yearId,
+            int semestrId,
+            int facultatId,
+            int typezId,
+            int grouppId,
+            int courseId,
+            int callId,
+            String calc_fysgc,
+            boolean blockdate,
+            Teacher teacher,
+            Model model
+    ) {
+        String[] names = new String[]{"periodId", "yearId", "semestrId", "facultatId", "typezId", "grouppId", "courseId", "callId"};
+        for (int i = 0; i < names.length; i++) {
+            if (name.equals(names[i])) {
+                switch (i) {
+                    case 0:
+                        periodId = number;
+                        break;
+                    case 1:
+                        yearId = number;
+                        break;
+                    case 2:
+                        semestrId = number;
+                        break;
+                    case 3:
+                        facultatId = number;
+                        break;
+                    case 4:
+                        typezId = number;
+                        break;
+                    case 5:
+                        grouppId = number;
+                        break;
+                    case 6:
+                        courseId = number;
+                        break;
+                    case 7:
+                        callId = number;
+                        break;
+                }
+            }
+        }
+        Year year = getYear2(model, yearId);
+        Semestr semestr = getSemestr1(model, semestrId);
+        Facultat facultat = getFacultat2(model, facultatId, semestr);
+        String typeZ = getTypeZ1(model, typezId);
+        Groupp groupp = getGroupp1(model, grouppId, typeZ, semestr, year, facultat);
+        Course course = getCourse1(model, grouppId, groupp, teacher);
+        Call call = getCall1(model, callId);
+        List<String> periodList = getPeroid(model, periodId);
+        int kolzan = 0;
+        if (course!= null){
+            kolzan = course.getKolzan();
+        }
+        model.addAttribute("kolzan", kolzan);
+        model.addAttribute("tdate", utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")));
+        return new  ModelForStart(periodId, year, semestr, facultat, groupp, course, call, typeZ);
+        //return null;
+}
+    public ModelForStart prepareStart1(
             String name,
             int number,
             int periodId,
@@ -588,7 +688,7 @@ public class TeacherControllerService {
                 int i = 0;
                 i < names.length; i++) {
             if (name.equals(names[i])) {
-                System.out.println("i=" + i + " names[i]=" + names[i] + " number=" + number);
+                //System.out.println("i=" + i + " names[i]=" + names[i] + " number=" + number);
                 switch (i) {
                     case 0:
                         periodId = number;
@@ -636,7 +736,11 @@ public class TeacherControllerService {
         }
 
         Call tempCall = findByTime(utilsController.getTimeNow());
-        Raspisanie raspisanie = raspisanieService.findRaspisaniesByActiondateAndCall(calc_fysgc, tempCall);
+        Raspisanie raspisanie = null;
+        List<Raspisanie> raspisanies = raspisanieService.findRaspisaniesByActiondateAndCall(calc_fysgc, tempCall);
+        if (raspisanies.size()>0){
+            raspisanie = raspisanies.get( 0 );
+        }
         if ((raspisanie != null) && (name.equals("typezId"))) {
             callId = Long.valueOf(raspisanie.getCall().getId()).intValue();
             if (raspisanie.getTheme().getTypezan().equals("лаб")) {
@@ -705,10 +809,7 @@ public class TeacherControllerService {
         model.addAttribute("courseId", courseId);
         model.addAttribute("blockdate", blockdate);
         Call call = getCall1(model, callId);
-        return new
-
-                ModelForStart(periodId, year, semestr, facultat, groupp, course, call, typeZstring);
-
+        return new  ModelForStart(periodId, year, semestr, facultat, groupp, course, call, typeZstring);
     }
 
 
@@ -745,7 +846,7 @@ public class TeacherControllerService {
         String[] names = new String[]{"periodId", "yearId", "semestrId", "facultatId", "typezId", "grouppId", "courseId", "callId"};
         for (int i = 0; i < names.length; i++) {
             if (name.equals( names[i] )) {
-                System.out.println( "i=" + i + " names[i]=" + names[i] + " number=" + number );
+                //System.out.println( "i=" + i + " names[i]=" + names[i] + " number=" + number );
                 switch (i) {
                     case 0:
                         periodId = number;
@@ -830,7 +931,7 @@ public class TeacherControllerService {
                     j++;
                     Call call1 = callService.findByName( fordelete.getSecond() );
                     if (call1 != null) {
-                        Raspisanie raspisanie = raspisanieService.findRaspisaniesByActiondateAndCall( fordelete.getFirst(), call1 );
+                        Raspisanie raspisanie = raspisanieService.findByActiondateAndCall( fordelete.getFirst(), call1 );
 
                         Long id = raspisanie.getId();
                         raspisanie.setCall( null );
@@ -923,7 +1024,7 @@ public class TeacherControllerService {
             String[] names = new String[]{"periodId", "yearId", "semestrId", "facultatId", "typezId", "grouppId", "courseId", "callId"};
             for (int i = 0; i < names.length; i++) {
                 if (name.equals( names[i] )) {
-                    System.out.println( "i=" + i + " names[i]=" + names[i] + " number=" + number );
+                    //System.out.println( "i=" + i + " names[i]=" + names[i] + " number=" + number );
                     switch (i) {
                         case 0:
                             periodId = number;
@@ -996,11 +1097,11 @@ public class TeacherControllerService {
             String tekDate = utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) );
             int ind = 0;
             for (Raspisanie raspisanie : raspisanies){
-                System.out.println(ind + " raspisanie = " + raspisanie.getActiondate() + "  " + raspisanie.getCall().getName());
+                //System.out.println(ind + " raspisanie = " + raspisanie.getActiondate() + "  " + raspisanie.getCall().getName());
                 ind++;
                 if ((utilsController.compareDate( raspisanie.getActiondate(), calc_fysgc) >= 0)
                         && (utilsController.compareDate( raspisanie.getActiondate(), tekDate) >= 0)){
-                    System.out.println("save");
+                    //System.out.println("save");
                     DoubleString item = new DoubleString( raspisanie.getActiondate(), raspisanie.getCall().getName() );
                     dates.add( item );
                 }
@@ -1018,7 +1119,7 @@ public class TeacherControllerService {
                     if (i < dates.size()) {
                         DoubleString fordelete = dates.get( i );
                         Call call1 = callService.findByName( fordelete.getSecond() );
-                        Raspisanie raspisanie = raspisanieService.findRaspisaniesByActiondateAndCall( fordelete.getFirst(), call1 );
+                        Raspisanie raspisanie = raspisanieService.findByActiondateAndCall( fordelete.getFirst(), call1 );
                         raspisanieService.delete( raspisanie );
                     }
                 }
@@ -1446,7 +1547,8 @@ public class TeacherControllerService {
         }
         int o = 0;
     }
-    public String calcRasp(Model model,
+    public String calcRasp(HttpSession session,
+                           Model model,
                            String name,
                            int number,
                            Course course,
@@ -1489,8 +1591,29 @@ public class TeacherControllerService {
 
             return "Такого круса нет";
         }
+
         boolean addnewdates = false;
+        Call value = (Call) session.getAttribute("oldCall");
         raspisanies =  raspisanieService.findAllByCourse(course);
+        if (raspisanies.size()==0) {
+            if (value != null) {
+                if ((!name.equals("callId")) && (!name.equals("nplanes"))) {
+                    call = value;
+                }
+                raspisanies = raspisanieService.findAllByCallAndCourseEmpty(call)
+                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                                rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
+            } else {
+                raspisanies = raspisanieService.findAll()
+                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                                rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
+                if (raspisanies.size()>0) {
+                    call = raspisanies.get(0).getCall();
+                }
+            }
+            //.findAllRaspisaniesByActiondateAndCall(calc_fysgc, call);
+            //.stream().map(rasp -> if (rasp.getCourse() == null) new Raspisanie(rasp. .getActiondate, number, "", call, theme, course));//.findAllRaspisaniesByActiondateAndCall(calc_fysgc, call);
+        }
         QuickSort.quickSort(raspisanies, 0, raspisanies.size()-1);
         //teacherControllerService1.findRaspisanie(course, null, null);//raspisanieService.findRaspisaniesByCourse( course );
         //raspisanies = new ArrayList<>();
@@ -1501,7 +1624,7 @@ public class TeacherControllerService {
         }
         List<DoubleString> dates = new ArrayList<DoubleString>();
         dates = raspisanies.stream().map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
-                .collect(Collectors.toList());
+                .sorted((o1, o2)->o1.compareTo(o2)).collect(Collectors.toList());
         //dates = raspisanies.stream().map(rasp ->new DoubleString( rasp.getActiondate(), "rasp.getCall().getName()" ))
         //        .collect( Collectors.toList());
 
@@ -1518,7 +1641,7 @@ public class TeacherControllerService {
                     j++;
                     Call call1 = callService.findByName(fordelete.getSecond());
                     if (call1 != null) {
-                        Raspisanie raspisanie = raspisanieService.findRaspisaniesByActiondateAndCall(fordelete.getFirst(), call1);
+                        Raspisanie raspisanie = raspisanieService.findByActiondateAndCall(fordelete.getFirst(), call1);
 
                         Long id = raspisanie.getId();
                         //raspisanie.setCourse( null );
@@ -1537,10 +1660,23 @@ public class TeacherControllerService {
             model.addAttribute("disabled", true);//кнопка пассивна
         } else {
             if ((addnewdates) || ((number == 999) && (!blockdate))) {// || (name.equals("dates"))) {
+                if (value != null) {
+                    raspisanies = raspisanieService.findAllByCallAndCourseEmpty(value)
+                            .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                                    rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
+                    dates = raspisanies.stream().map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
+                            .sorted((o1, o2)->o1.compareTo(o2)).collect(Collectors.toList());
+                    session.setAttribute("oldCall", value);
+                } else {
+                    session.setAttribute("oldCall", call);
+                }
                 dates.addAll(calculate_raspisanie(periodId, dates, call.getName(), calc_fysgc, periodInt));
+                dates = dates.stream().sorted((o1, o2)->o1.compareTo(o2)).collect(Collectors.toList());
                 model.addAttribute("disabled", false);//кнопка активна
             } else {
                 model.addAttribute("disabled", true);//кнопка пассивна
+                //Call call1 = call;
+                //session.setAttribute("oldCall", /call1);
             }
             if (btn_out.equals("save")) {
                 int index = 0;
@@ -1559,7 +1695,6 @@ public class TeacherControllerService {
                 BufferedReader buffReader = new BufferedReader(reader);
                 String[] startKolNumb = buffReader.readLine().trim().split(" ");
 
-                //String[] startKolNumb = callService.findCallById(10L).getName().split(" ");
                 String startKolNmbSt = startKolNumb[0].replace((char) 65279, ' ').trim();
                 int startIndex = Integer.parseInt(startKolNmbSt);//Кол-во повторений в первой итерации главного цикла
                 int firstCount = Integer.parseInt(startKolNumb[1]);// Кол-во итераций главного цикла
@@ -1570,47 +1705,69 @@ public class TeacherControllerService {
                 int firstIndex = 0;//Индекс главного цикла
                 int secondIndex = firstCount;// Индекс второстепенного цикла
                 boolean firstSecond = true;
-                while (firstIndex < firstCount) {
-                    if (startIndex > 0) {
-                        if (firstIndex < dates.size()) {
-                            DoubleString item = dates.get(firstIndex);//Дата и время в расписании
-                            index++;
-                            Call call1 = null; //callService.findByName(item.getSecond());//Объект Call, содержащий дату и время в расписании
-                            Theme theme = null;//themeService.findThemesByCourse_AndNumberAnd_Typezan(course, index, typez);
-                            if (firstSecond) {
-                                theme = themeService.findThemesByCourse_AndNumberAnd_Typezan(course, firstIndex + 1, typez);
-                                call1 = callService.findByName(dates.get(firstIndex).getSecond());
-                                //System.out.println(dates.get(firstIndex).getFirst() + "  " + dates.get(firstIndex).getSecond()
-                                //        + " dates.size()=" + dates.size() + " firstIndex=" + firstIndex + " index=" + index + "theme=" + theme.getNameteme());
-                                raspisanieService.save(dates.get(firstIndex).getFirst(), index, call1, theme, course);
-                                firstIndex++;
-                            } else {
-                                if (dates.size() > secondIndex) {
-                                    theme = themeService.findThemesByCourse_AndNumberAnd_Typezan(course, secondIndex + 1, typez);
-                                    call1 = callService.findByName(dates.get(secondIndex).getSecond());
-                                    //System.out.println(dates.get(secondIndex).getFirst() + "  " + dates.get(secondIndex).getSecond()
-                                    //+ " dates.size()=" + dates.size() + " firstIndex=" + firstIndex + " index=" + index + "theme=" + theme.getNameteme());
-                                    raspisanieService.save(dates.get(secondIndex).getFirst(), index, call1, theme, course);
+                if (course.getKolzan() != dates.size()) {
+                    for (DoubleString item : dates){
+                        Call call1 = callService.findByName(item.getSecond());
+                        Raspisanie raspisanieSave = raspisanieService.save(item.getFirst(), 0, call1, null, null);
+                        raspisanies.add(raspisanieSave);
+                    }
+                }else {
+                    //while (firstIndex < firstCount) {
+                    while (firstIndex <= firstCount + secondCount) {
+                        if (startIndex > 0) {
+                            if (firstIndex < dates.size()) {
+                                //int indexFromDates = secondIndex;
+                                //if (firstSecond){
+                                //    indexFromDates = firstIndex;
+                                //}
+                                DoubleString item = dates.get(firstIndex);//Дата и время в расписании
+                                index++;
+                                Call call1 = null; //callService.findByName(item.getSecond());//Объект Call, содержащий дату и время в расписании
+                                Theme theme = null;//themeService.findThemesByCourse_AndNumberAnd_Typezan(course, index, typez);
+                                if (firstSecond) {
+                                    theme = themeService.findThemesByCourse_AndNumberAnd_Typezan(course, firstIndex + 1, typez);
+                                    call1 = callService.findByName(dates.get(firstIndex).getSecond());
+                                    //System.out.println(dates.get(firstIndex).getFirst() + "  " + dates.get(firstIndex).getSecond()
+                                    //        + " dates.size()=" + dates.size() + " firstIndex=" + firstIndex + " index=" + index + "theme=" + theme.getNameteme());
+                                    Raspisanie raspisanieSave = raspisanieService.save(dates.get(firstIndex).getFirst(), index, call1, theme, course);
+                                    raspisanies.add(raspisanieSave);
+                                    theme.setZadanie(Integer.toString(index));
+                                    themeService.update(theme);
+                                    firstIndex++;
                                 } else {
-                                    System.out.println(" " + " index=" + index);
+                                    if (dates.size() > secondIndex) {
+                                        theme = themeService.findThemesByCourse_AndNumberAnd_Typezan(course, index, typez);
+                                        call1 = callService.findByName(dates.get(firstIndex).getSecond());
+                                        //System.out.println(dates.get(secondIndex).getFirst() + "  " + dates.get(secondIndex).getSecond()
+                                        //+ " dates.size()=" + dates.size() + " firstIndex=" + firstIndex + " index=" + index + "theme=" + theme.getNameteme());
+                                        Raspisanie raspisanieSave = raspisanieService.save(dates.get(firstIndex).getFirst(), index, call1, theme, course);
+                                        raspisanies.add(raspisanieSave);
+                                        theme.setZadanie(Integer.toString(index));
+                                        themeService.update(theme);
+                                        firstIndex++;
+                                        int oo = 0;
+                                    } else {
+                                        //System.out.println(" " + " index=" + index);
+                                    }
+                                    secondIndex++;
                                 }
-                                secondIndex++;
+                                if (startIndex < 3) {
+                                    startIndex--;
+                                }
+                            } else {
+                                firstIndex++;
+                                int oooo = 0;
                             }
-                            if (startIndex < 3) {
-                                startIndex--;
+                        } else {//Переход к следующей итерации
+                            firstSecond = !firstSecond;
+                            if (firstSecond) {//firstCount > secondCount
+                                startIndex = 2;
+                            } else {
+                                startIndex = 1;
                             }
-                        } else {
-                            firstIndex++;
-                            int oooo = 0;
-                        }
-                    } else {//Переход к следующей итерации
-                        firstSecond = !firstSecond;
-                        if (firstSecond) {//firstCount > secondCount
-                            startIndex = 2;
-                        } else {
-                            startIndex = 1;
                         }
                     }
+                    raspisanies = raspisanieService.findAllByCourse(course);
                 }
                 //List<Theme> themeList = themeService.findThemesByCourse_IdAndTypezan(course, typez);
                 //if (dates.size() == themeList.size()) {
@@ -1621,9 +1778,10 @@ public class TeacherControllerService {
                 //    index++;
                 //}
                 //}
-                raspisanies = raspisanieService.findAllByCourse(course);
+                //raspisanies = raspisanieService.findAllByCourse(course);
                 //raspisanies = findRaspisanie(course, null, null);
-                dates = raspisanies.stream().map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
+                dates = raspisanies.stream().filter(rasp -> rasp.getCourse()==null)
+                        .map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
                         .collect(Collectors.toList());
             }
         }
@@ -1724,7 +1882,7 @@ public class TeacherControllerService {
         //17 08 23     }
         //17 08 23 };
         //17 08 23 raspisanieList.sort(comp);
-        QuickSort.quickSort(raspisanieList, 0, raspisanieList.size()-1);
+        //QuickSort.quickSort(raspisanieList, 0, raspisanieList.size()-1);
 
         return raspisanieList;
     }
@@ -1796,5 +1954,17 @@ public class TeacherControllerService {
         }
         int o = 0;
         model.addAttribute("filesForDnevniks", filesForDnevniks);
+    }
+    public List<Raspisanie> findByActiondateCallTeacher(String actionDate, Call callNow, Teacher teacher){
+        List<Raspisanie> raspisanieList = new ArrayList<>();
+        List<Course> courseList = courseService.findByTeacher(teacher);
+        for (Course course : courseList) {
+            List<Raspisanie> res = findRaspisanie(course, actionDate, callNow.getName());
+            if (res.size()>0) {
+                raspisanieList.addAll(res);
+            }
+        }
+        QuickSort.quickSort(raspisanieList, 0, raspisanieList.size()-1);
+        return raspisanieList;
     }
 }

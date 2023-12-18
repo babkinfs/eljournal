@@ -72,9 +72,10 @@ public class StudentController {
 
     @GetMapping
     public String startStudent(Model model, @AuthenticationPrincipal User user) throws Exception {
+
         Raspisanie currentRaspisanie = studentControllerService.fillStudentHeader( model, user, 9999, "9999");
         //Создать список ответов преподавателя
-
+        //Записать в filesfordnevnik записть если отсутствует задание
         return "studentstart";
     }
 
@@ -137,6 +138,7 @@ public class StudentController {
                                @RequestParam("fullnamecop" )MultipartFile fullnamecop
     ) throws IOException, ParseException {
         //String fromteacher = "";
+        prepAddr = prepAddr.replace(",", "");
         Student student = studentService.findByUser(user);
         Raspisanie currentRaspisanie = null;
         //if (btn_out.equals("download")) {
@@ -145,6 +147,13 @@ public class StudentController {
         } else {
             //int btn_out_int = Integer.parseInt(btn_out);
             currentRaspisanie = studentControllerService.fillStudentHeader(model, user, btn_out, numberString[btn_out]);
+            String nameSendFile = fullnamecop.getOriginalFilename();//.getName();
+            //if ((nameSendFile.indexOf(".pdf")<0) || (nameSendFile.indexOf(".docx")<0)) {
+            if (nameSendFile.indexOf(".pdf")<0) {
+                model.addAttribute("message", "Файл не отправлен, т.к.он не в формате pdf!");
+                model.addAttribute("messageType", "danger");
+                return "studentstart";
+            }
         }
         if ((fromteacher.equals("")) && (copied.equals("")) && (btn_prep.equals("1"))) {// btn_out.equals("download")){
             model.addAttribute("message", "Укажите путь сохранения для файла инструкции!");
@@ -178,8 +187,16 @@ public class StudentController {
                     outfile = studentControllerService.getInstruct(model, copied, student, smallRaspisanie.get(btn_out));
                     break;
                 case "2": //Отправить файл
+                    int numberFromForm = Integer.parseInt(numberString[btn_out]);
+                    Dnevnik tempDnevnik = null;
+                    for (Dnevnik dnevnik : dnevnikList){
+                        if (dnevnik.getRaspisanie().getNumber() == numberFromForm){
+                            tempDnevnik = dnevnik;
+                            break;
+                        }
+                    }
                     outfile = studentControllerService.getFile(btn_out, student, smallRaspisanie.get(btn_out),
-                            nn_po_poryadku, fullnamecop, dnevnikList);
+                            nn_po_poryadku, fullnamecop, tempDnevnik);
                     break;
                 case "3": //Получить сообщение
                     outfile = studentControllerService.getMessage(prepAddr, student, smallRaspisanie.get(btn_out), copied);

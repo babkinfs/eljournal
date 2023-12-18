@@ -24,13 +24,13 @@ public class UtilsController {
 
     public static int facultatIdInit = 0;
     public static int yearIdInit = 0;
-    public static int semestrIdInit = 3;
+    public static int semestrIdInit = 1;
     public static int groupIdInit = 0;
     public static int courseIdInit = 0;
     public static int callIdInit = 7;
-    public static int typezIdInit = 0;
+    public static int typezIdInit = 1;
     public static int gpgidInit = 0;
-    public static int periodidInit = 5;
+    public static int periodidInit = 8;
     public static int subgrouppidInit = 0;
     public static boolean dtStartDtEndVisibleInit = true;
 
@@ -143,8 +143,8 @@ public class UtilsController {
     }
     private Calendar calendar;
     public  String getDataNow(SimpleDateFormat dateFormat){
-        calendar = new GregorianCalendar(2022, Calendar.FEBRUARY, 6 );//2  //16  Calendar.SEPTEMBER
-        calendar.set(Calendar.HOUR, 11);//8 9 11 13
+        calendar = new GregorianCalendar(2023, Calendar.SEPTEMBER, 18 );//4 //11 //18
+        calendar.set(Calendar.HOUR, 8);//8 9 11 13
         calendar.set(Calendar.MINUTE, 42);
         calendar.set(Calendar.SECOND, 12);
         return dateFormat.format(calendar.getTime());

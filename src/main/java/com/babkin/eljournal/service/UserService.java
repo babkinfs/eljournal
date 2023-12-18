@@ -104,7 +104,7 @@ public class UserService implements UserDetailsService {
         userRepo.save( user );
         if (startdata.getRole().equals( "TEACHER" ) || startdata.getRole().equals( "LECTOR" )) {
             Teacher teacher = new Teacher( startdata.getFirstname(), startdata.getSecondname(),
-                    startdata.getLastname(), user, null );
+                    startdata.getLastname(), user, startdata.getRole() );
             teacherService.update( teacher );
         } else {
             //Student student = new Student(startdata.getFirstname(), startdata.getSecondname(), startdata.getLastname(),
@@ -146,7 +146,7 @@ public class UserService implements UserDetailsService {
             return false;
         }
         user.setActive(true);
-        user.setActivationCode( null );
+        user.setActivationCode( code );// null );
         userRepo.save( user );
         return true;
     }

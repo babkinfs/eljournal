@@ -26,9 +26,6 @@ public class GroupService {
         return null;
     }
 
-    public List<Groupp> findGrouppByNameGroupp(String nameGroup){
-        return groupRepos.findAllByNamegroupp( nameGroup );
-    }
 
     public Groupp findGrouppById(Long id){
         return groupRepos.findGrouppById( id );
@@ -59,6 +56,12 @@ public class GroupService {
     }
     public List<Groupp> findGrouppsByFacultat_AndSemestr_AndYear(Facultat facultat, Semestr semestr, Year year){
         return groupRepos.findGrouppsByFacultat_IdAndSemestr_IdAndYear_Id( facultat.getId(), semestr.getId(), year.getId() );
+    }
+    public List<Groupp> findGrouppByNameGroupp(String nameGroup, Semestr semestr){
+        if (semestr == null){
+            return null;
+        }
+        return groupRepos.findAllByNamegrouppAndSemestr_IdOrderBySubgrouppAsc( nameGroup,  semestr.getId());
     }
 
     public List<Groupp> getDistinctGrouppByNamegroupp(String nameGroupp){

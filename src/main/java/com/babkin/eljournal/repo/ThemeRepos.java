@@ -19,4 +19,5 @@ public interface ThemeRepos extends JpaRepository<Theme, Long> {
     List<Theme> findAllByCourse_Id(Long courseid);
 
     List<Theme> findThemesByCourse_IdAndTypezan(Long courseid, String typezan);
+    List<Theme> findThemesByCourse_IdAndTypezanAndNameteme(Long courseid, String typezan, String nameTheme);
 }

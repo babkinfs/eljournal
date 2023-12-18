@@ -19,7 +19,7 @@
 </#macro>
 
 <#macro listString nameid searchid title ids items>
-    <div >
+    <div>
         <h6 class="my-0">
             ${title}
         </h6>

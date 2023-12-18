@@ -1,6 +1,7 @@
 package com.babkin.eljournal.service;
 
 import com.babkin.eljournal.entity.working.Course;
+import com.babkin.eljournal.entity.working.Raspisanie;
 import com.babkin.eljournal.entity.working.Theme;
 import com.babkin.eljournal.repo.ThemeRepos;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,8 @@ public class ThemeService {
         }
 //        Theme themeFromDb = themeRepos.findThemeByNametemeAndZadanieAndTypezanAndFileshablonAndFileforstudentAndCourse_Id(
 //                nametheme, zadanie, typeZan, fileshablon, fileforstudent, course.getId());
-        List<Theme> themeFromDb = themeRepos.findThemesByCourse_IdAndTypezan(course.getId(), typeZan);
+//        List<Theme> themeFromDb = themeRepos.findThemesByCourse_IdAndTypezan(course.getId(), typeZan);
+        List<Theme> themeFromDb = themeRepos.findThemesByCourse_IdAndTypezanAndNameteme(course.getId(), typeZan, nametheme);
         Theme res = null;
         if (themeFromDb.size()==0){
             res = new Theme(nametheme, zadanie, number, typeZan, fileshablon, fileforstudent, course);
@@ -47,5 +49,8 @@ public class ThemeService {
             return null;
         }
         return themeRepos.findThemesByCourse_IdAndTypezan(course.getId(), typezan);
+    }
+    public Theme update(Theme theme){
+        return themeRepos.saveAndFlush( theme );
     }
 }

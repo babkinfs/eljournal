@@ -28,8 +28,9 @@ public class TeacherService {
 
     public Teacher save(Teacher teacher){
         if (teacher != null) {
-            Teacher teacherFromDB = teacherRepos.findTeacherByFirstname_IdAndSecondname_IdAndAndLastname_Id(
-                    teacher.getFirstname().getId(), teacher.getSecondname().getId(), teacher.getLastname().getId() );
+            Teacher teacherFromDB = teacherRepos.findTeacherByFirstname_IdAndSecondname_IdAndLastname_IdAndRole(
+                    teacher.getFirstname().getId(), teacher.getSecondname().getId(),
+                    teacher.getLastname().getId(),  teacher.getRole());
             if (teacherFromDB == null) {
                 teacherFromDB = teacherRepos.save( teacher );
             }

@@ -16,7 +16,7 @@ public class FilesForDnevnikService {
 
     public FilesForDnevnik addFilesForDnevnik(String datesdachi, FilesForDnevnikEnum ktocdal, String path,
                                               String status, Dnevnik dnevnik) {
-        if (dnevnik == null) {
+        if (dnevnik == null) {//Проверить правильность указания dnevnik. Тема в дневнике не та что нужно
             return null;
         }
         String ksdal = ktocdal.name();
@@ -53,6 +53,7 @@ public class FilesForDnevnikService {
                 indprf = str.indexOf(".pdf");
                 if (indprf == -1) {
                     str = str.substring(str.indexOf("~") + 1);
+                    str = str.substring(0, str.indexOf("."));
                 } else {
                     str = str.substring(str.indexOf("~") + 1, str.indexOf(".pdf"));
                 }

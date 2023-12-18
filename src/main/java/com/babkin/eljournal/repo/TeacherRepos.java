@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface TeacherRepos extends JpaRepository<Teacher, Long> {
     @EntityGraph(attributePaths = { "firstname", "secondname", "lastname", "user" })
     Teacher findTeacherByFirstname_IdAndSecondname_IdAndAndLastname_Id(Long firstnameId, Long secondnameId, Long lastnameId);
+    @EntityGraph(attributePaths = { "firstname", "secondname", "lastname", "user" })
+    Teacher findTeacherByFirstname_IdAndSecondname_IdAndLastname_IdAndRole(Long firstnameId, Long secondnameId, Long lastnameId, String role);
 
     @EntityGraph(attributePaths = { "firstname", "secondname", "lastname", "user" })
         //@EntityGraph(attributePaths = {"secondname"})

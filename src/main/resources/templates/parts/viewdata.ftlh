@@ -24,6 +24,31 @@
         </tbody>
     </table>
 </#macro>
+<#macro viewsThemeList themelist>
+    <table class="timeline" align="left" width="100%">
+        <tbody>
+        <table>
+            <#assign oldtheme = "" >
+            <#list themelist! as theme>
+                <tr>
+                    <td>
+                        &nbsp;${theme.getNumber()} &nbsp;
+                    </td>
+                    <td>
+                        &nbsp;${theme.getNameteme()} &nbsp;
+                    </td>
+                    <td>
+                        &nbsp;${theme.getZadanie()} &nbsp;
+                    </td>
+                    <td>
+                        &nbsp;${theme.getFileforstudent()} &nbsp;
+                    </td>
+                </tr>
+            </#list>
+        </table>
+        </tbody>
+    </table>
+</#macro>
 
 <#macro viewsdatasRaspisanie tdatas>
     <div id="fff" class="list-group-item d-flex justify-content-between lh-sm">

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/teacher1")
 @PreAuthorize( "hasAuthority('LECTOR') || hasAuthority('TEACHER')" )
 public class TeacherController1 {
-    @Value( "${upload.path}" )
+    @Value("${upload.path}")
     private String uploadPath;
     @Value("${base.path}")
     private String basepath;
@@ -71,6 +71,8 @@ public class TeacherController1 {
     private ExerciseService exerciseService;
     @Autowired
     private UpdateDocument updateDocument;
+    @Autowired
+    private SemestrService semestrService;
 
     //public static final String PATH_ANSWER = "d:\\Answers\\";
     @GetMapping
@@ -91,11 +93,11 @@ public class TeacherController1 {
                 utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
                 false, teacher, model);
         List<String> galka = (List<String>) session.getAttribute("galka");
-        if (galka == null ){
+        if (galka == null) {
             galka = new ArrayList<>();
             session.setAttribute("galka", galka);
         }
-        model.addAttribute("visibleKeep", galka.size()>0);
+        model.addAttribute("visibleKeep", galka.size() > 0);
 //        model.addAttribute("visibleKeep", true);
 
         String dateNow = utilsController.getDataNow(new SimpleDateFormat("dd-MM-yyyy hh:mm"));
@@ -118,15 +120,27 @@ public class TeacherController1 {
         dateNow = dateNowArr[0]; //utilsController.getDataNow();
 
         Call callNow = callService.findByName(utilsController.findeCurrentCall(dateNowArr[1]));
-        List<Raspisanie> raspisanieList = raspisanieService.findAllRaspisaniesByActiondateAndCall(dateNow, callNow);
 
-        //Предварительно определить расписание
-        Raspisanie currentRaspisanie = raspisanieList.get(0);
-        Groupp groupp = currentRaspisanie.getCourse().getGroupp(); //modelForStart.getGroupp();
+        //List<Raspisanie> raspisanieList = raspisanieService.findAllRaspisaniesByActiondateAndCall(dateNow, callNow);
+        List<Raspisanie> raspisanieList = teacherControllerService.findByActiondateCallTeacher(dateNow, callNow, teacher);
+        Groupp groupp = modelForStart.getGroupp();
+        Raspisanie currentRaspisanie = null;
+        if (raspisanieList.size() != 0) {
+            for (Raspisanie current : raspisanieList) {
+                if ((current.getCourse().getTeacher().getId() == teacher.getId()) && (current.getActiondate().equals(dateNow))) {
+                    currentRaspisanie = current;
+                }
+            }
+            //Предварительно определить расписание
+            //Raspisanie currentRaspisanie = raspisanieList.get(0);
+            if (currentRaspisanie!=null) {
+                groupp = currentRaspisanie.getCourse().getGroupp(); //modelForStart.getGroupp();
+            }
+        }
         List<Student> studentList = studentControllerService.getStudents(groupp);
         String time = utilsController.getTimeNow();
         model.addAttribute("time", time);
-        if (studentList.size() == 0){
+        if (studentList.size() == 0) {
             model.addAttribute("currentRaspisanie", null);
             return "baseteacher";
         }
@@ -146,7 +160,7 @@ public class TeacherController1 {
                 boolean ok = false;
                 List<Dnevnik> temp = dnevnikService.findAllByRaspisanie_AndStudent(currentRaspisanie, student);
                 if ((student.getGroupp().getSubgroupp().getNamesubgroupp().equals(currentGroupp.getSubgroupp().getNamesubgroupp()))
-                        || (currentGroupp.getSubgroupp().getNamesubgroupp().equals("0"))){
+                        || (currentGroupp.getSubgroupp().getNamesubgroupp().equals("0"))) {
                     //|| (student.getGroupp().getSubgroupp().getNamesubgroupp().indexOf(".")<0)) {
                     if (!student.getGroupp().getSubgroupp().getNamesubgroupp().equals("0")) {//удаляем студентов изначально в 0 подгруппе
                         boolean ochnoZaochno = galka.contains(Integer.toString(indexStudentFull));
@@ -159,7 +173,7 @@ public class TeacherController1 {
                                 tempDnevnik.setOchno(ochnoZaochno);
                             }
                             ok = true;
-                            studentFulls.add(new StudentFull(student, ok, tempDnevnik));
+                            studentFulls.add(new StudentFull(student, tempDnevnik.isIspresent(), tempDnevnik));
                         } else {
                             studentFulls.add(new StudentFull(student, ok, null));
                         }
@@ -169,8 +183,8 @@ public class TeacherController1 {
                 }
             }
         }
-        if (studentFulls.size() == 0){
-            studentFulls  = null;
+        if (studentFulls.size() == 0) {
+            studentFulls = null;
         } else {
             raspisanieList = null;
         }
@@ -188,7 +202,7 @@ public class TeacherController1 {
         //String value = (String) session.getAttribute("startProverka");
         //session.setAttribute("startProverkaNamefile", filenameOut);
         //String nameCheckValue ="";
-        List<String> galka = (List<String>)session.getAttribute("galka");
+        List<String> galka = (List<String>) session.getAttribute("galka");
         String[] indexesString = nameCheckValue.split(",");
         List<Integer> indexesInt = new ArrayList<Integer>();
         //for (String st : indexesString) {
@@ -236,26 +250,26 @@ public class TeacherController1 {
                               @RequestParam int search_call,
                               @RequestParam String nameCheckValue
     ) {
-        model.addAttribute( "students1", null );
-        model.addAttribute( "students2", null );
-        model.addAttribute( "aDateTime", calcstd );//??
-        model.addAttribute( "calcstd", calcstd );
-        model.addAttribute( "timeview", true );
+        model.addAttribute("students1", null);
+        model.addAttribute("students2", null);
+        model.addAttribute("aDateTime", calcstd);//??
+        model.addAttribute("calcstd", calcstd);
+        model.addAttribute("timeview", true);
 
         List<Call> calls = callService.findAll();
-        model.addAttribute( "calls", calls );
+        model.addAttribute("calls", calls);
         Long callid = 0L;
-        model.addAttribute( "callid", callid );
+        model.addAttribute("callid", callid);
         return "baseteacher";
     }
 
     @GetMapping("/courses")
     public String courses(@AuthenticationPrincipal User user, Model model) {
 
-        Teacher teacher = teacherService.findTeacherByUser( user );
+        Teacher teacher = teacherService.findTeacherByUser(user);
         //List<Course> courses = courseService.findByTeacher( teacher );
         List<Course> courses = courseService.findAll();
-        model.addAttribute( "courses", courses );
+        model.addAttribute("courses", courses);
         return "courses";
     }
 
@@ -265,38 +279,38 @@ public class TeacherController1 {
         //String nm = file.getName();
         //String ct = file.getContentType();
 
-        String namefile = teacherControllerService.getPath( file.getOriginalFilename() );
-        String result = verification.makeLexema( teacherControllerService.getPath( utilsController.getNameOfFile( 2 ) ) );
-        result = verification.verificateFile( namefile, model, "courses" );
+        String namefile = teacherControllerService.getPath(file.getOriginalFilename());
+        String result = verification.makeLexema(teacherControllerService.getPath(utilsController.getNameOfFile(2)));
+        result = verification.verificateFile(namefile, model, "courses");
         if (result != null) {
             return result;
         }
         //Reader reader = new FileReader( UtilsController.getPath() + "//" + file.getOriginalFilename() );
-        Reader reader = new FileReader( namefile );
-        BufferedReader buffReader = new BufferedReader( reader );
-        String lineStart = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-        if (!lineStart.equals( "# Количество пар~Полное наименование~Краткое наим.r~год~группа~подгруппа~семестр~факультет~форма обуч.~ФИО" )) {
-            model.addAttribute( "messageType", "danger" );
-            model.addAttribute( "message", "TeacherController/courses : Файл " + file.getOriginalFilename() + " содержит ошибки!" );
+        Reader reader = new FileReader(namefile);
+        BufferedReader buffReader = new BufferedReader(reader);
+        String lineStart = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+        if (!lineStart.equals("@ Количество пар~Полное наименование~Краткое наим.r~год~группа~подгруппа~семестр~факультет~форма обуч.~ФИО")) {
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "TeacherController/courses : Файл " + file.getOriginalFilename() + " содержит ошибки!");
             return "courses";
         }
         lineStart = buffReader.readLine();
         while (buffReader.ready()) {
 
-            String line = buffReader.readLine().trim().replaceAll( "\\s{2,}", " " );
-            if (!line.equals( "" )) {
-                String[] st = line.split( "~" );
-                result = teacherControllerService.fillCourse( st );
+            String line = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
+            if (!line.equals("") && !line.contains("Осень") && !line.contains("Весна")) {
+                String[] st = line.split("~");
+                result = teacherControllerService.fillCourse(st);
                 if (result != null) {
-                    model.addAttribute( "messageType", "danger" );
-                    model.addAttribute( "message", result );
+                    model.addAttribute("messageType", "danger");
+                    model.addAttribute("message", result);
                 }
             }
         }
-        Teacher teacher = teacherService.findTeacherByUser( user );
+        Teacher teacher = teacherService.findTeacherByUser(user);
         //List<Course> courses = courseService.findByTeacher( teacher );
         List<Course> courses = courseService.findByTeacher(teacher);
-        model.addAttribute( "courses", courses );
+        model.addAttribute("courses", courses);
 
         //teacherControllerService.saveStudents();
         //teacherControllerService.savePlans(teacher);
@@ -305,8 +319,8 @@ public class TeacherController1 {
     }
 
     @GetMapping("/variantes")
-    public String variantes(Model model, @AuthenticationPrincipal User user){
-        Teacher teacher = teacherService.findTeacherByUser( user );
+    public String variantes(Model model, @AuthenticationPrincipal User user) {
+        Teacher teacher = teacherService.findTeacherByUser(user);
         ModelForStart modelForStart = teacherControllerService.prepareStart(
                 "nplanes",
                 0,
@@ -318,18 +332,18 @@ public class TeacherController1 {
                 UtilsController.groupIdInit,
                 UtilsController.courseIdInit,
                 UtilsController.callIdInit,
-                utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ),
-                false, teacher, model );
-        model.addAttribute( "razdel", "Варианты лаб." );
-        model.addAttribute( "viewcall", false );
-        model.addAttribute( "viewdate", false );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", true );
-        model.addAttribute( "viewbuttonsohranit", false );
-        model.addAttribute( "activSohranit", true );
+                utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
+                false, teacher, model);
+        model.addAttribute("razdel", "Варианты лаб.");
+        model.addAttribute("viewcall", false);
+        model.addAttribute("viewdate", false);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", true);
+        model.addAttribute("viewbuttonsohranit", false);
+        model.addAttribute("activSohranit", true);
         model.addAttribute("todir", "nplanesdoubl");
-        model.addAttribute( "dirteacher", "nplanesdoubl" );
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        model.addAttribute("dirteacher", "nplanesdoubl");
+        model.addAttribute("aDateTime", utilsController.getDataNow());
         return "variantes";
     }
 
@@ -343,33 +357,33 @@ public class TeacherController1 {
             @RequestParam int groupp,
             @RequestParam int course,
             @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal User user, Model model){
-        Teacher teacher = teacherService.findTeacherByUser( user );
+            @AuthenticationPrincipal User user, Model model) {
+        Teacher teacher = teacherService.findTeacherByUser(user);
 
-        model.addAttribute( "razdel", "Варианты лаб." );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", true );
-        model.addAttribute( "todir", "zadaniya" );
-        ModelForStart modelForStart = teacherControllerService.prepareStart( "zadainya", 0, period, year,
+        model.addAttribute("razdel", "Варианты лаб.");
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", true);
+        model.addAttribute("todir", "zadaniya");
+        ModelForStart modelForStart = teacherControllerService.prepareStart("zadainya", 0, period, year,
                 semestr, facultat, typez, groupp, course, 0,
-                utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ),
-                false, teacher, model );
-        model.addAttribute( "viewcall", false );
-        model.addAttribute( "viewdate", false );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", false );
-        model.addAttribute( "viewbuttonsohranit", true );
-        model.addAttribute( "activSohranit", true );
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+                utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
+                false, teacher, model);
+        model.addAttribute("viewcall", false);
+        model.addAttribute("viewdate", false);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", false);
+        model.addAttribute("viewbuttonsohranit", true);
+        model.addAttribute("activSohranit", true);
+        model.addAttribute("aDateTime", utilsController.getDataNow());
 
         return "variantes";
     }
 
     @GetMapping("/nplanes")
-    public String nplanes(Model model, @AuthenticationPrincipal User user) throws ParseException, IOException {
+    public String nplanes(HttpSession session, Model model, @AuthenticationPrincipal User user) throws ParseException, IOException {
 
 
-        Teacher teacher = teacherService.findTeacherByUser( user );
+        Teacher teacher = teacherService.findTeacherByUser(user);
         ModelForStart modelForStart = teacherControllerService.prepareStart(
                 "nplanes",
                 0,
@@ -381,31 +395,31 @@ public class TeacherController1 {
                 UtilsController.groupIdInit,
                 UtilsController.courseIdInit,
                 UtilsController.callIdInit,
-                utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ),
-                false, teacher, model );
-        model.addAttribute( "razdel", "Планы" );
-        model.addAttribute( "viewcall", true );
-        model.addAttribute( "viewdate", true );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", false );
-        model.addAttribute( "viewbuttonsohranit", true );
-        model.addAttribute( "activSohranit", true );
+                utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
+                false, teacher, model);
+        model.addAttribute("razdel", "Планы");
+        model.addAttribute("viewcall", true);
+        model.addAttribute("viewdate", true);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", false);
+        model.addAttribute("viewbuttonsohranit", true);
+        model.addAttribute("activSohranit", true);
         model.addAttribute("DateFill", new SimpleDateFormat("E MMM dd yyyy H:m:s zzzz").format(new Date()));
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        model.addAttribute("aDateTime", utilsController.getDataNow());
 
-        String result = teacherControllerService.calcRasp( model,
+        String result = teacherControllerService.calcRasp(session, model,
                 "nplanes", 0, modelForStart.getCourse(), modelForStart.getCall(),
                 UtilsController.periodidInit, UtilsController.getTypeZbyIndex(UtilsController.typezIdInit, 0), "",
-                utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ), false );
-        model.addAttribute( "todir", "nplanesdoubl" );
-        model.addAttribute( "disabled", true );
+                utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")), false);
+        model.addAttribute("todir", "nplanesdoubl");
+        model.addAttribute("disabled", true);
         //model.addAttribute( "calc_fysgc", utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ) );
         // 27 07 2022 return "nplanesdoubl";
         return "nplanes";
     }
 
     @PostMapping("nplanesdoubl")
-    public String nplanesdoubl(
+    public String nplanesdoubl(HttpSession session,
             Model model, @AuthenticationPrincipal User user,
             @RequestParam String btn_out,
             @RequestParam int period,
@@ -417,7 +431,7 @@ public class TeacherController1 {
             @RequestParam int course,
             @RequestParam int call,
             @RequestParam String calc_fysgc) throws ParseException, IOException {
-        Teacher teacher = teacherService.findTeacherByUser( user );
+        Teacher teacher = teacherService.findTeacherByUser(user);
         ModelForStart modelForStart = teacherControllerService.prepareStart(
                 "nplanesdoubl",
                 0,
@@ -432,21 +446,21 @@ public class TeacherController1 {
                 calc_fysgc,
                 false,
                 teacher,
-                model );
-        model.addAttribute( "razdel", "nplanesdoubl" );
-        model.addAttribute( "viewcall", true );
-        model.addAttribute( "viewdate", true );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", false );
-        model.addAttribute( "viewbuttonsohranit", true );
-        model.addAttribute( "activSohranit", true );
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+                model);
+        model.addAttribute("razdel", "nplanesdoubl");
+        model.addAttribute("viewcall", true);
+        model.addAttribute("viewdate", true);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", false);
+        model.addAttribute("viewbuttonsohranit", true);
+        model.addAttribute("activSohranit", true);
+        model.addAttribute("aDateTime", utilsController.getDataNow());
 
-        String result = teacherControllerService.calcRasp( model,
+        String result = teacherControllerService.calcRasp(session, model,
                 "nplanesdoubl", 0, modelForStart.getCourse(), modelForStart.getCall(),
-                period, UtilsController.getTypeZbyIndex(typez, 0), btn_out, calc_fysgc, false );
-        model.addAttribute( "todir", "nplanesdoubl" );
-        model.addAttribute( "disabled", true );
+                period, UtilsController.getTypeZbyIndex(typez, 0), btn_out, calc_fysgc, false);
+        model.addAttribute("todir", "nplanesdoubl");
+        model.addAttribute("disabled", true);
         return "nplanesdoubl";
     }
 //09 07 2022        System.out.println("String nplanes");
@@ -492,8 +506,8 @@ public class TeacherController1 {
 //    }
 
     @GetMapping("/nplanesdoubl/{number}/{name}/{periodId}/{yearId}/{semestrId}/{facultatId}/{typezId}/{grouppId}/{courseId}/{callId}/{calc_fysgc}/{blockdate}/{razdel}")
-    public String nplanesdoubl(
-            @PathVariable("number") int number,
+    public String nplanesdoubl(HttpSession session,
+                               @PathVariable("number") int number,
             @PathVariable("name") String name,
             @PathVariable("periodId") int periodId,
             @PathVariable("yearId") int yearId,
@@ -508,7 +522,7 @@ public class TeacherController1 {
             @PathVariable("razdel") String razdel,
             Model model, @AuthenticationPrincipal User user) throws ParseException, IOException {
 
-        Teacher teacher = teacherService.findTeacherByUser( user );
+        Teacher teacher = teacherService.findTeacherByUser(user);
         ModelForStart modelForStart = teacherControllerService.prepareStart(
                 name,
                 number,
@@ -522,63 +536,63 @@ public class TeacherController1 {
                 callId,
                 calc_fysgc,
                 blockdate,
-                teacher, model );
-        model.addAttribute( "razdel", razdel );
-        model.addAttribute( "activSohranit", true );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
-        if (modelForStart.getCourse()==null){
+                teacher, model);
+        model.addAttribute("razdel", razdel);
+        model.addAttribute("activSohranit", true);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("aDateTime", utilsController.getDataNow());
+        if (modelForStart.getCourse() == null) {
             List<Course> courses = courseService.findByGroupp(modelForStart.getGroupp());
-            model.addAttribute( "messageType", "danger" );
-            model.addAttribute( "message", "Эту подгруппу распределяет "
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "Эту подгруппу распределяет "
                     + courses.get(0).getTeacher().getLastname().getName() + " "
-                    + courses.get(0).getTeacher().getFirstname().getName()  + " "
+                    + courses.get(0).getTeacher().getFirstname().getName() + " "
                     + courses.get(0).getTeacher().getSecondname().getName());
             //return "errors";
-            model.addAttribute( "viewbuttonzagruzit", true );
-            model.addAttribute( "viewbuttonsohranit", false );
-            model.addAttribute( "viewdateUdalit", false );
-            model.addAttribute( "viewcall", false );
-            model.addAttribute( "viewdate", false );
-            model.addAttribute( "dirteacher", "nvarlabs" );
-            model.addAttribute( "todir", "nplanesdoubl" );
+            model.addAttribute("viewbuttonzagruzit", true);
+            model.addAttribute("viewbuttonsohranit", false);
+            model.addAttribute("viewdateUdalit", false);
+            model.addAttribute("viewcall", false);
+            model.addAttribute("viewdate", false);
+            model.addAttribute("dirteacher", "nvarlabs");
+            model.addAttribute("todir", "nplanesdoubl");
             model.addAttribute("exerciselist", null);
             return "nvarlabs";
         }
-        if (razdel.equals( "Задания" )){
-            if (modelForStart.getTypeZ().equals("лекция")){
-                model.addAttribute( "viewbuttonsohranit", false );
-                model.addAttribute( "viewdateUdalit", false );
+        if (razdel.equals("Задания")) {
+            if (modelForStart.getTypeZ().equals("лекция")) {
+                model.addAttribute("viewbuttonsohranit", false);
+                model.addAttribute("viewdateUdalit", false);
             } else {
                 model.addAttribute("viewbuttonsohranit", true);//false
-                model.addAttribute( "viewdateUdalit", true );
+                model.addAttribute("viewdateUdalit", true);
                 model.addAttribute("text", "Варианты заданий для студентов");
             }
 
-            model.addAttribute( "viewbuttonzagruzit", false );//true
+            model.addAttribute("viewbuttonzagruzit", false);//true
             //model.addAttribute( "viewbuttonsohranit", false );
-            model.addAttribute( "viewcall", false );
-            model.addAttribute( "viewdate", false );
+            model.addAttribute("viewcall", false);
+            model.addAttribute("viewdate", false);
             //model.addAttribute( "aDateTime", utilsController.getDataNow() );
-            model.addAttribute( "dirteacher", "nzadaniyas" );
+            model.addAttribute("dirteacher", "nzadaniyas");
             //model.addAttribute( "dirteacher", "nplanesdoubl" );
-            model.addAttribute( "todir", "nplanesdoubl" );
+            model.addAttribute("todir", "nplanesdoubl");
             //teacherControllerService.findRaspisanie(modelForStart.getCourse());
         }
-        if (razdel.equals( "Планы" )) {
-            model.addAttribute( "viewcall", true );
-            model.addAttribute( "viewdate", true );
-            model.addAttribute( "viewbuttonzagruzit", false );
-            model.addAttribute( "viewbuttonsohranit", true );
-            model.addAttribute( "viewdateUdalit", true );
-            model.addAttribute( "dirteacher", "nplanes" );
-            model.addAttribute( "todir", "nplanesdoubl" );
+        if (razdel.equals("Планы")) {
+            model.addAttribute("viewcall", true);
+            model.addAttribute("viewdate", true);
+            model.addAttribute("viewbuttonzagruzit", false);
+            model.addAttribute("viewbuttonsohranit", true);
+            model.addAttribute("viewdateUdalit", true);
+            model.addAttribute("dirteacher", "nplanes");
+            model.addAttribute("todir", "nplanesdoubl");
 
-            if (name.equals("callId")){
+            if (name.equals("callId")) {
                 int lenPeriod = Period.getSemestr(periodId);
                 int kolzan = modelForStart.getCourse().getKolzan();
                 boolean ok = false;
-                if (kolzan <= Period.getSemestr(Period.getListWeekLength()-1)){
+                if (kolzan <= Period.getSemestr(Period.getListWeekLength() - 1)) {
                     if (kolzan == lenPeriod) {
                         ok = true;
                     }
@@ -590,13 +604,13 @@ public class TeacherController1 {
                         }
                     }
                 }
-                if (!ok){
-                    model.addAttribute( "messageType", "danger" );
-                    model.addAttribute( "message", "Количество пар не совпадает с выбором периода!" );
-                    model.addAttribute( "dates1", new ArrayList<DoubleString>() );
-                    model.addAttribute( "dates2", new ArrayList<DoubleString>() );
-                    model.addAttribute( "dates3", new ArrayList<DoubleString>() );
-                    model.addAttribute( "dates4", new ArrayList<DoubleString>() );
+                if (!ok) {
+                    model.addAttribute("messageType", "danger");
+                    model.addAttribute("message", "Количество пар не совпадает с выбором периода!");
+                    model.addAttribute("dates1", new ArrayList<DoubleString>());
+                    model.addAttribute("dates2", new ArrayList<DoubleString>());
+                    model.addAttribute("dates3", new ArrayList<DoubleString>());
+                    model.addAttribute("dates4", new ArrayList<DoubleString>());
                     return "nplanes";
                 }
             }
@@ -604,11 +618,12 @@ public class TeacherController1 {
             //List<DoubleString> dates = raspisanies.stream().map( rasp -> new DoubleString( rasp.getActiondate(), rasp.getCall().getName() ) )
             //        .collect( Collectors.toList() );
             //teacherControllerService.fillDates( dates, model );
-            teacherControllerService.calcRasp( model, name, number, modelForStart.getCourse(), modelForStart.getCall(),
-                    modelForStart.getPeriodId(), UtilsController.getTypeZbyIndex(typezId, 0), "", calc_fysgc, blockdate );
+            teacherControllerService.calcRasp(session, model, name, number, modelForStart.getCourse(),
+                    modelForStart.getCall(), modelForStart.getPeriodId(),
+                    UtilsController.getTypeZbyIndex(typezId, 0), "", calc_fysgc, blockdate);
             return "nplanes";
         }
-        if (razdel.equals( "Варианты лаб." )){
+        if (razdel.equals("Варианты лаб.")) {
 
             //model.addAttribute( "viewcall", false );
             //model.addAttribute( "viewdate", false );
@@ -621,37 +636,35 @@ public class TeacherController1 {
             //model.addAttribute( "aDateTime", utilsController.getDataNow() );
 
 
-
-
-            model.addAttribute( "viewbuttonzagruzit", true );
-            model.addAttribute( "viewbuttonsohranit", false );
-            model.addAttribute( "viewdateUdalit", false );
-            model.addAttribute( "viewcall", false );
-            model.addAttribute( "viewdate", false );
-            model.addAttribute( "dirteacher", "nvarlabs" );
-            model.addAttribute( "todir", "nplanesdoubl" );
+            model.addAttribute("viewbuttonzagruzit", true);
+            model.addAttribute("viewbuttonsohranit", false);
+            model.addAttribute("viewdateUdalit", false);
+            model.addAttribute("viewcall", false);
+            model.addAttribute("viewdate", false);
+            model.addAttribute("dirteacher", "nvarlabs");
+            model.addAttribute("todir", "nplanesdoubl");
             List<Exercise> exerciseList = verification.showVarLab(modelForStart);
             model.addAttribute("exerciselist", exerciseList);
             return "nvarlabs";
         }
         if (modelForStart.getResult() != null) {
-            model.addAttribute( "messageType", "danger" );
-            model.addAttribute( "message", modelForStart.getResult() );
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", modelForStart.getResult());
             return "nplanesdoubl";
         }
-        if (calc_fysgc.equals("undefined")){
+        if (calc_fysgc.equals("undefined")) {
             calc_fysgc = utilsController.getDataNow();
         }
-        teacherControllerService.calcRasp( model, name, number, modelForStart.getCourse(), modelForStart.getCall(),
-                modelForStart.getPeriodId(), UtilsController.getTypeZbyIndex(typezId, 0), "", calc_fysgc, blockdate );
+        teacherControllerService.calcRasp(session, model, name, number, modelForStart.getCourse(), modelForStart.getCall(),
+                modelForStart.getPeriodId(), UtilsController.getTypeZbyIndex(typezId, 0), "", calc_fysgc, blockdate);
         //model.addAttribute( "tdatas", raspisanieService.findRaspisaniesByCourse( modelForStart.getCourse() ) );
         return "nplanesdoubl";
     }
 
     @GetMapping("/nvarlabs")
     public String nvarlabsget(@AuthenticationPrincipal User user,
-                              Model model){
-        Teacher teacher = teacherService.findTeacherByUser( user );
+                              Model model) {
+        Teacher teacher = teacherService.findTeacherByUser(user);
         ModelForStart modelForStart = teacherControllerService.prepareStart(
                 "nplanes",
                 0,
@@ -663,20 +676,26 @@ public class TeacherController1 {
                 UtilsController.groupIdInit,
                 UtilsController.courseIdInit,
                 UtilsController.callIdInit,
-                utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ) ),
-                false, teacher, model );
-        model.addAttribute( "razdel", "Варианты лаб." );
-        model.addAttribute( "viewcall", false );
-        model.addAttribute( "viewdate", false );
-        model.addAttribute( "viewdateUdalit", false );
-        model.addAttribute( "viewbuttonzagruzit", true );
-        model.addAttribute( "viewbuttonsohranit", false );
-        model.addAttribute( "activSohranit", true );
+                utilsController.getDataNow(new SimpleDateFormat("dd-MM-YYYY")),
+                false, teacher, model);
+        model.addAttribute("razdel", "Варианты лаб.");
+        model.addAttribute("viewcall", false);
+        model.addAttribute("viewdate", false);
+        model.addAttribute("viewdateUdalit", false);
+        model.addAttribute("viewbuttonzagruzit", true);
+        model.addAttribute("viewbuttonsohranit", false);
+        model.addAttribute("activSohranit", true);
         model.addAttribute("todir", "nplanesdoubl");
-        model.addAttribute( "dirteacher", "nplanesdoubl" );
-        model.addAttribute( "aDateTime", utilsController.getDataNow() );
+        model.addAttribute("dirteacher", "nplanesdoubl");
+        model.addAttribute("aDateTime", utilsController.getDataNow());
         List<Exercise> exerciseList = verification.showVarLab(modelForStart);
         model.addAttribute("exerciselist", exerciseList);
+        //model.addAttribute("semestrId", modelForStart.getSemestr().getId());
+        //model.addAttribute("semestrs", semestrService.findAll());
+        //teacherControllerService.getSemestr1(model, UtilsController.semestrIdInit);//Integer.parseInt(modelForStart.getSemestr().getName()));
+        model.addAttribute("viewbuttonzagruzit", true);
+        List<Theme> themeList = themeService.findThemesByCourse_IdAndTypezan(modelForStart.getCourse(), modelForStart.getTypeZ().substring(0,3));
+        model.addAttribute("themelist", themeList);
         return "nvarlabs";
     }
 
@@ -748,11 +767,15 @@ public class TeacherController1 {
             model.addAttribute("exerciselist", exerciseList);
 
             return "nvarlabs";
-        } catch (Exception e){
+        } catch (Exception e) {
             model.addAttribute("messageType", "success");
             model.addAttribute("message", e.getMessage());
             return "errors";
         }
+    }
+    @GetMapping("/nvarlabsave")
+    public String nvarlabs(MultipartFile file){
+        return "";
     }
 
     @PostMapping("/nzadaniyas")
@@ -818,7 +841,8 @@ public class TeacherController1 {
         return "nzadaniyas";
     }
     @PostMapping("/nplanes")
-    public String nplanes(@AuthenticationPrincipal User user,
+    public String nplanes(HttpSession session,
+                          @AuthenticationPrincipal User user,
                           Model model,
                           @RequestParam String btn_out,
                           @RequestParam int period,
@@ -861,7 +885,7 @@ public class TeacherController1 {
         }
         model.addAttribute( "aDateTime", utilsController.getDataNow() );
 
-        String result = teacherControllerService.calcRasp( model,
+        String result = teacherControllerService.calcRasp(session, model,
                 "nplanes", 0, modelForStart.getCourse(), modelForStart.getCall(),
                 period, utilsController.getTypeZbyIndex(typez, 0), btn_out, calc_fysgc, false );
         model.addAttribute( "todir", "nplanesdoubl" );
@@ -1050,7 +1074,7 @@ public class TeacherController1 {
     }
 
     @PostMapping("delete")
-    public String delete(
+    public String delete(HttpSession session,
             @RequestParam int period,
             @RequestParam int year,
             @RequestParam int semestr,
@@ -1079,7 +1103,7 @@ public class TeacherController1 {
         model.addAttribute( "activSohranit", true );
         model.addAttribute( "aDateTime", utilsController.getDataNow() );
 
-        teacherControllerService.calcRasp( model, "", 0, modelForStart.getCourse(), modelForStart.getCall(),
+        teacherControllerService.calcRasp(session,  model, "", 0, modelForStart.getCourse(), modelForStart.getCall(),
                 period, UtilsController.getTypeZbyIndex(typez, 0), "delete", calc_fysgc, false );
         model.addAttribute( "todir", "nplanesdoubl" );
         return "zadaniya";
@@ -1196,17 +1220,20 @@ public class TeacherController1 {
         //
         String forProverka = "forProverka";
         String value = (String) session.getAttribute("startProverka");
-        if (value != null && value.equals("true")){
+        if (value != null && value.equals("true")) {
             String startProverkaNamefile = (String) session.getAttribute("startProverkaNamefile");
-            model.addAttribute( "messageType", "success" );
-            if (startProverkaNamefile != null){
-                model.addAttribute( "message", "Ответ преподавателя в файле " + startProverkaNamefile );
+            model.addAttribute("messageType", "success");
+            if (startProverkaNamefile != null) {
+                model.addAttribute("message", "Ответ преподавателя в файле " + startProverkaNamefile);
             } else {
                 forProverka = "Ответ преподавателя готов к отправке";
                 model.addAttribute("message", forProverka);
             }
         }
-
+        if (value != null && value.equals("not found")){
+            model.addAttribute("messageType", "danger");
+            model.addAttribute("message", "На данное сообщение отвечать не нужно");
+        }
         if (value != null && value.equals("occupied")){
             model.addAttribute( "messageType", "danger" );
             model.addAttribute( "message", "Существуют недоредактированные файлы в папке \"" + pathantwer + "\"" );
@@ -1235,7 +1262,7 @@ public class TeacherController1 {
     }
     //отправить файл на сервер для предоставления пользователю и очистить папку
     private void sendClear(String parm, HttpSession session) throws IOException {
-        String[] list = parm.replaceAll("\\s+", " ").split(" ");
+        String[] list = parm.replaceAll("\\s+", " ").trim().split(" ");
         Long index = Long.parseLong(list[0]);
         long lenOld = Long.parseLong(list[1]);
         String filename = pathantwer + list[2];
@@ -1243,7 +1270,7 @@ public class TeacherController1 {
         long lenNew = control.length();
         //Отправить файл на сервер
         //21 12 22 String filenameOut = uploadPath + "\\Answers\\" + parm;
-        String filenameOut = uploadPath + "\\Answers\\" + list[0] + " " + list[2] + ".docx";
+        String filenameOut = uploadPath + "\\Answers\\" + list[0] + " " + list[2];
         FileUtils.copyFile(control, new File(filenameOut));// filenameOut == куда
         control.delete();
         session.setAttribute("startProverkaNamefile", filenameOut);
@@ -1251,26 +1278,26 @@ public class TeacherController1 {
         if (lenOld == lenNew){
             //Ошибок больше нет, отчет принят
             filesForDnevnik.setOcenka("Проверено, замечаний нет.");
-            filesForDnevnik.setStatus("отправил студенту");
         } else {
             filesForDnevnik.setOcenka("");
-            filesForDnevnikService.update(filesForDnevnik);
         }
+        filesForDnevnik.setStatus("отправил студенту");
+        filesForDnevnikService.update(filesForDnevnik);
         String date = utilsController.getDataNow( new SimpleDateFormat( "dd-MM-YYYY" ));
         filesForDnevnik.setDatecontrol(date);
         filesForDnevnik.setPathteacher(filenameOut);
         filesForDnevnikService.update(filesForDnevnik);
         String nameForFinde = filesForDnevnik.getPathstudent();
-        int first = nameForFinde.lastIndexOf("~")+1;
-        int second = nameForFinde.lastIndexOf(".docx");
-        String tempForFinde1 = nameForFinde.substring(first, second);
-        String tempForFinde = nameForFinde.substring(nameForFinde.lastIndexOf("~")+1, nameForFinde.lastIndexOf(".docx"));
+        //int first = nameForFinde.lastIndexOf("~")+1;
+        //int second = nameForFinde.lastIndexOf(".pdf");//docx");
+        //String tempForFinde1 = nameForFinde.substring(first, second);
+        String tempForFinde = nameForFinde.substring(nameForFinde.lastIndexOf("~")+1, nameForFinde.lastIndexOf(".pdf"));//".docx"));
         int tempForFindeInt = Integer.parseInt(tempForFinde);
         List<FilesForDnevnik> forDnevnikList = filesForDnevnikService.findFilesForDnevnikByKtocdalAndDatesdachiAndDnevnik(filesForDnevnik.getKtocdal(),
                 date, filesForDnevnik.getDnevnik());
         for (FilesForDnevnik temp : forDnevnikList){
             nameForFinde = temp.getPathstudent();
-            String str = nameForFinde.substring(nameForFinde.lastIndexOf("~")+1, nameForFinde.lastIndexOf(".docx"));
+            String str = nameForFinde.substring(nameForFinde.lastIndexOf("~")+1, nameForFinde.lastIndexOf(".pdf"));//".docx"));
             int strNumb = Integer.parseInt(str);
             if (strNumb < tempForFindeInt){
                 temp.setOcenka("Не отвечал");
@@ -1285,7 +1312,7 @@ public class TeacherController1 {
                            @RequestParam String[] pathstudent,
                            @RequestParam String[] course,
                            @RequestParam String[] theme,
-                           @RequestParam String[] filesfordnevnik,
+                           @RequestParam String[] lengthfilesfordnevnik,//индекс записи из файла filesfordnevnil
                            @RequestParam int btn_out) throws Exception {
         //Проверить в рабочей папке PATH_ANSWER один или два файла
         //Если файл один, отправить его на сервер для отправки пользователю и очистить папку
@@ -1296,18 +1323,12 @@ public class TeacherController1 {
         //    session.setAttribute("startProverka", "occupied");
         //    return "redirect:/teacher1/proverka";
         //}
-        Long index =  Long.parseLong(filesfordnevnik[btn_out]);
+        Long index =  Long.parseLong(lengthfilesfordnevnik[btn_out]);
         FilesForDnevnik filesForDnevnik = filesForDnevnikService.findById(index);
         String sem = filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getSemestr().getName();
         String semestr = "Vesna";
         if ("13579".indexOf(sem) >= 0){
             semestr = "Osen";
-        }
-        String grp = filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getOnlynamegroupp();
-        switch (grp) {
-            case "310" : grp = "\\3 к ИВТ\\1 sem lab Sety"; break;
-            case "391" : grp = "\\3 к ИБ\\1 sem lab Sety"; break;
-            case "291" : grp = "\\2 к ИБ\\4 sem VychSety\\4 sem lab VychSety"; break;
         }
         Startdata startdata = startdataService.findByFirstname_NameAndSecondname_NameAndLastname_Family(
                 filesForDnevnik.getDnevnik().getStudent().getFirstname(),
@@ -1318,14 +1339,31 @@ public class TeacherController1 {
                 filesForDnevnik.getDnevnik().getRaspisanie().getTheme(), startdata);
         String leklab = pathstudent[btn_out].substring(pathstudent[btn_out].lastIndexOf("\\")+1, pathstudent[btn_out].indexOf("~"));
         session.setAttribute("startProverka", "true");
+        //Находим полный путь и имя файла, под которым будет записан принятый файл студента
         String nameFile = pathstudent[btn_out].substring(pathstudent[btn_out].indexOf("Upload")+7);
-        String zadanie = uploadPath.substring(0, uploadPath.lastIndexOf("\\")) + "\\" + basepath + "\\"
-                + semestr + grp + "\\"
-                + filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getOnlynamegroupp()
-                + " exercise_seti_lab"//nameFile.substring(0, nameFile.indexOf("\\")) + " seti_lab"
+        String nameExerciseFile =  filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getOnlynamegroupp()
+                + " exercise_seti_lab"
                 + leklab.substring(1) + ".txt";
+        String zadanie = teacherControllerService.getPath(nameExerciseFile);
+
+                //22 08 2023 String grp1 = filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getOnlynamegroupp();
+        //22 08 2023 switch (grp1) {
+        //22 08 2023     case "310" : grp1 = "\\3 к ИВТ\\1 sem lab Sety"; break;
+        //22 08 2023     case "391" : grp1 = "\\3 к ИБ\\5 sem SetyiSyst"; break;
+        //22 08 2023     case "291" : grp1 = "\\2 к ИБ\\4 sem VychSety\\4 sem lab VychSety"; break;
+        //22 08 2023 }
+        //22 08 2023 String zadanie = uploadPath.substring(0, uploadPath.lastIndexOf("\\")) + "\\" + basepath + "\\"
+        //22 08 2023         //+ semestr + grp + "\\"
+        //22 08 2023         + semestr +  "\\"
+        //22 08 2023         + filesForDnevnik.getDnevnik().getRaspisanie().getCourse().getGroupp().getOnlynamegroupp()
+        //22 08 2023         + " exercise_seti_lab"//nameFile.substring(0, nameFile.indexOf("\\")) + " seti_lab"
+        //22 08 2023         + leklab.substring(1) + ".txt";
         //String zadanie1 = nameFile.substring(0, nameFile.indexOf("\\")) + " seti_lab" + leklab.substring(1) + ".txt";
 
+        if (zadanie.contains("не найден!")){
+            session.setAttribute("startProverka", "not found");
+            return "redirect:/teacher1/proverka";
+        }
         Reader reader1 = new FileReader( zadanie );
         BufferedReader buffReader1 = new BufferedReader( reader1 );
 
@@ -1335,7 +1373,8 @@ public class TeacherController1 {
         FileUtils.copyFile(new File(pathstudent[btn_out]), new File(filenameOut));// filenameOut == куда
         nameFile = nameFile.substring(0, nameFile.lastIndexOf("\\")).replaceAll("\\\\", "        ")+ leklab.substring(1);
         answ = answ.replaceAll("\\\\", "_");
-        String namefileFound = filesfordnevnik[btn_out] + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
+        //String namefileFound = lengthfilesfordnevnik[btn_out] + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
+        String namefileFound = answ.substring(0, answ.indexOf("~")) + ".docx";
         File uploadDir = new File(uploadPath + "\\Answers");
         String[] list = uploadDir.list();
         boolean found = false;
@@ -1346,7 +1385,8 @@ public class TeacherController1 {
             }
         }
         int indexAddMyParagr = 0;
-        answ = pathantwer + filesfordnevnik[btn_out] + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
+        answ = pathantwer + lengthfilesfordnevnik[btn_out] + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
+        //answ = pathantwer + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
         String inpUot = answ;// pathantwer + filesfordnevnik[btn_out] + " " + nameFile + ".docx";
         if (found){
             inpUot = uploadDir + "\\" + namefileFound;

@@ -13,6 +13,6 @@ public interface FacultatRepos extends JpaRepository<Facultat, Long> {
 
     Facultat findByNameAndForma(String name, String forma);
 
-    @Override
-    List<Facultat> findAll();
+    //@Override
+    List<Facultat> findByOrderByNameAsc();
 }

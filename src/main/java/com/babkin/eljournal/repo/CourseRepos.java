@@ -24,7 +24,7 @@ public interface CourseRepos extends JpaRepository<Course, Long> {
     List<Course> findAllByGrouppIdAndTeacher_Id(Long groupid, Long teacherid);
 
 
-    @EntityGraph(attributePaths = { "groupp", "teacher" })
+    @EntityGraph(attributePaths = { "groupp", "groupp.subgroupp", "groupp.semestr", "teacher" })
     List<Course> findByTeacher_Id(Long id);
 
 //    List<Course> findAllByTeacherNot_AndNameCourseFull_AndGroupp_Id(
@@ -33,7 +33,8 @@ public interface CourseRepos extends JpaRepository<Course, Long> {
 //            Teacher teacher, String name, Long grouppid);
 //    List<Course> findAllByTeacherNotAndNameCourseFullAndGroupp_Id(
 //            Teacher teacher, String name, Long grouppid);
-    List<Course> findAllByTeacher_IdNotAndGroupp_Namegroupp(Long id, String nameGr);
+//    List<Course> findAllByTeacher_IdNotAndGroupp_Namegroupp(Long id, String nameGr);
+    List<Course> findAllByTeacher_IdAndGroupp_Subgroupp_IdAndNameCourseFull(Long idTeacher, Long idSubgroupp, String nameCourse );
 
     @EntityGraph(attributePaths = { "teacher", "teacher.firstname", "teacher.secondname", "teacher.lastname", "groupp" })
     List<Course> findByGroupp_Id(Long grouppid);

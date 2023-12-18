@@ -61,6 +61,7 @@
             <table>
                 <thead>
                 <tr>
+                    <td>&nbsp;№ п/п&nbsp;</td>
                     <td>&nbsp;Дата проведения занятия&nbsp;</td>
                     <td>&nbsp;Тема&nbsp;</td>
                     <td>&nbsp;Инструкция&nbsp;</td>
@@ -78,23 +79,33 @@
                     <tr>
                         <td>&nbsp;${dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getNumber()}&nbsp;</td>
                         <td>&nbsp;${dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getActiondate()}&nbsp;</td>
-                        <td>&nbsp;${dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getTheme().getNameteme()}&nbsp;</td>
                         <td>&nbsp;
+                            <#if dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getTheme()??>
+                            ${dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getTheme().getNameteme()}</#if>
+                            &nbsp;</td>
+                        <td>&nbsp;
+                                <#if dnevnikAndFilesForDnevnik.dnevnik.isVisiblebuttons()>
                             <div class="f">
                                 <button id="btn_out1" name="btn_out" value="${index}"
                                         class="btn btn-primary my-3" type="submit">Получить</button>
                                 <input type="hidden" name="_csrf" value="${_csrf.token}">
                             </div>
+                                </#if>
                             &nbsp;</td>
                         <td>&nbsp;${dnevnikAndFilesForDnevnik.dnevnik.getPropuski()}&nbsp;</td>
                         <td>&nbsp;
+                            <#if dnevnikAndFilesForDnevnik.dnevnik.isVisiblebuttons()>
                             <div class="s">
                                 <input type="text" hidden name="numberString"
                                        value="${dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getNumber()}" />
-                                <button id="btn_out2" <#if index != 0> disabled </#if> name="btn_out" value="${index}"
+                                <!--button id="btn_out2" < #if index != 0> disabled < /#if> name="btn_out" value="$ {index}"
+                                        class="btn btn-primary my-3" type="submit">Отправить</button-->
+                                        <button id="btn_out2" <#if dnevnikAndFilesForDnevnik.dnevnik.getRaspisanie().getTheme().getFileshablon() == ""> disabled </#if>
+                                                name="btn_out" value="${index}"
                                         class="btn btn-primary my-3" type="submit">Отправить</button>
                                 <input type="hidden" name="_csrf" value="${_csrf.token}">
                             </div>
+                            </#if>
                             &nbsp;</td>
                         <td>&nbsp;<div>
                                 <#if (dnevnikAndFilesForDnevnik.filesForDnevnik)??>
@@ -117,7 +128,7 @@
                             <div class="t">
                                 <#if (dnevnikAndFilesForDnevnik.filesForDnevnik)??>
                                     <#if (dnevnikAndFilesForDnevnik.filesForDnevnik.getPathteacher())??>
-                                        <input type="text" hidden name="prepAddr"
+                                        <input type="text" name="prepAddr"
                                                value="${dnevnikAndFilesForDnevnik.filesForDnevnik.getPathteacher()}" />
                                         <#if (dnevnikAndFilesForDnevnik.filesForDnevnik).getOcenka()??>
                                             <#if (dnevnikAndFilesForDnevnik.filesForDnevnik).getOcenka() == "" >
@@ -173,7 +184,7 @@
                 ${kolzan}
             </small>
         </div>
-        <@cm.listString searchid="periodId" nameid="period" title="Период:" items=periods ids=periodId/>
+            <@cm.listString  searchid="periodId" nameid="period" title="Период:" items=periods ids=periodId/>
         <#if viewdateUdalit>
             <button id="btn_out" name="btn_out" value="delete" class="btn btn-primary" type="submit"> Удалить </button>
         <#else >

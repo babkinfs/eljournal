@@ -1,30 +1,30 @@
 ﻿1 18 9
 Osen\3 к ИБ\5 sem SetyiSyst\5 sem lab SetyiSyst
 Шаблон Задание лаб.txt
-лб~1~~Введение, основные требования к выполнению лабораторных работ@
-лб~2~и 1 Начальная настройка EVE.docx~Начальная настройка EVE@
-лб~3~и 2 Схема Vlan.docx~Схема Vlan@391 exercise_seti_lab2.txt
-лб~4~и 3 Настройка Vlan на Cisco.docx~Настройка Vlan на Cisco@
-лб~5~и 4 Настройка виланов на Mikrotik 1.docx~Настройка виланов на Mikrotik@
-лб~6~п 5.docx~6@
-лб~7~и 6 Настройка DHCP сервера на Mikrotik.docx~Настройка DHCP сервера на Mikrotik@
-лб~8~и 7 Статическая маршрутизация Схема.docx~Статическая маршрутизация Схема@391 exercise_seti_lab7.txt
-лб~9~и 8 Static Routing Практика.docx~Static Routing Практика@
-лб~10~п9.docx~10@
-лб~11~и 10 Динамическая маршрутизация RIP.docx~Динамическая маршрутизация RIP.@391 exercise_seti_lab10.txt
-лб~12~и 11 OSPF часть1.docx~OSPF часть1@391 exercise_seti_lab11.txt
-лб~13~и 12 OSPF часть 2.docx~OSPF часть 2@
-лб~14~п13.docx~14@
-лб~15~и 14 GRE туннель часть 1 Cisco.docx~GRE туннель часть 1 Cisco@391 exercise_seti_lab14.txt
-лб~16~и 15 GRE туннель часть 2 Mikrotik.docx~GRE туннель часть 2 Mikrotik@
-лб~17~и 16 IpTables.docx~IpTables@391 exercise_seti_lab16.txt
-лб~18~п17.docx~18@
-лб~19~д 1.docx~1@
-лб~20~д 2.docx~2@
-лб~21~д 3.docx~3@
-лб~22~д 4.docx~4@
-лб~23~д 5.docx~5@
-лб~24~д 6.docx~6@
-лб~25~д 7.docx~7@
-лб~26~д 8.docx~8@
-лб~27~д 9.docx~9@
+лб~1~п 1.docx~Введение, основные требования к выполнению лабораторных работ@
+лб~2~и 2 Начальная настройка EVE NG.docx~Начальная настройка EVE-NG@
+лб~3~и 3 Схема Vlan.docx~Схема Vlan@391 exercise_seti_lab3.txt
+лб~4~и 4 Настройка Vlan на Cisco.docx~Настройка Vlan на Cisco@391 exercise_seti_lab4.txt
+лб~5~и 5 Настройка виланов на Mikrotik 1.docx~Настройка виланов на Mikrotik@
+лб~6~п 6.docx~6@
+лб~7~и 7 Настройка DHCP сервера на Mikrotik.docx~Настройка DHCP сервера на Mikrotik@
+лб~8~и 8 Статическая маршрутизация Схема.docx~Статическая маршрутизация Схема@391 exercise_seti_lab8.txt
+лб~9~и 9 Static Routing Практика.docx~Static Routing Практика@
+лб~10~п 10.docx~10@
+лб~11~и 11 Динамическая маршрутизация RIP.docx~Динамическая маршрутизация RIP.@391 exercise_seti_lab11.txt
+лб~12~и 12 OSPF часть1.docx~OSPF часть1@391 exercise_seti_lab12.txt
+лб~13~и 13 OSPF часть 2.docx~OSPF часть 2@
+лб~14~п 14.docx~14@
+лб~15~и 15 GRE туннель часть 1 Cisco.docx~GRE туннель часть 1 Cisco@391 exercise_seti_lab15.txt
+лб~16~и 16 GRE туннель часть 2 Mikrotik.docx~GRE туннель часть 2 Mikrotik@
+лб~17~и 17 IpTables.docx~IpTables@391 exercise_seti_lab17.txt
+лб~18~п 18.docx~18@
+лб~19~д 1.docx~71@
+лб~20~д 2.docx~72@
+лб~21~д 3.docx~73@
+лб~22~д 4.docx~74@
+лб~23~д 5.docx~75@
+лб~24~д 6.docx~76@
+лб~25~д 7.docx~77@
+лб~26~д 8.docx~78@
+лб~27~д 9.docx~79@

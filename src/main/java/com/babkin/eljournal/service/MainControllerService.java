@@ -531,8 +531,10 @@ public class MainControllerService {
                 courses = courseService.findByTeacher(teacher);
                 for (Course course : courses) {
                     //raspisanie.addAll(teacherControllerService1.findRaspisanie( course, actDate, null));
-                    raspisanie.addAll(raspisanieService.findAllByActiondateAndCourse(
-                            actDate, course));
+                    if (raspisanieService.count()>0) {
+                        raspisanie.addAll(raspisanieService.findAllByActiondateAndCourse(
+                                actDate, course));
+                    }
                 }
             }
             Student student = studentService.findByUser(user);
@@ -544,8 +546,9 @@ public class MainControllerService {
                         subgrouppService.findSubgrouppByNamesubgroupp("0"));
                 courses.addAll(courseService.findByGroupp(grouppLek));
                 for (Course course : courses) {
-                    raspisanie.addAll(raspisanieService.findAllByActiondateAndCourse(
-                            actDate, course));
+                    List<Raspisanie> raspisanieList = raspisanieService.findAllByActiondateAndCourse(
+                            actDate, course);
+                    raspisanie.addAll(raspisanieList);
                 }
             }
         }

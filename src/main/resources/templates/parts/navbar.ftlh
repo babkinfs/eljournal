@@ -35,9 +35,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/teacher1/students">Студенты</a>
                 </li>
-                <li class="nav-item">
+                <!--li class="nav-item">
                     <a class="nav-link" href="/teacher1/zadaniya">Задания</a>
-                </li>
+                </li-->
                 <li class="nav-item">
                     <a class="nav-link" href="/teacher1/nplanes">Планы</a>
                 </li>

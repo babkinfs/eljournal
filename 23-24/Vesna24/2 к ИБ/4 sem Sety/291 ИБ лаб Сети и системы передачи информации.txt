@@ -1,0 +1,27 @@
+1 16 8
+Vesna24\2 к ИБ\4 sem Sety\4 sem lab Sety
+Шаблон Задание лаб.txt
+лб~1~и 1 Создание простой сети.docx~Создание простой сети@291 exercise_seti_lab1.txt
+лб~2~и 2 Концентраторы и коммутаторы.docx~Концентраторы и коммутаторы@291 exercise_seti_lab2.txt
+лб~3~и 3 Подключение к сетевому оборудованию.docx~Подключение к сетевому оборудованию@291 exercise_seti_lab3.txt
+лб~4~и 4 VLAN.docx~VLAN@291 exercise_seti_lab4.txt
+лб~5~и 5 STP.docx~STP@291 exercise_seti_lab5.txt
+лб~6~и 6 Агрегирование каналов.docx~Агрегирование каналов@291 exercise_seti_lab6.txt
+лб~7~и 7 Коммутатор уровня L3.docx~Коммутатор уровня L3@291 exercise_seti_lab7.txt
+лб~8~и 8 Sub Interf Маршрутизация трафика между VLAN.docx~Sub Interf Маршрутизация трафика между VLAN@291 exercise_seti_lab8.txt
+лб~9~и 9 Static routing.docx~Static routing@291 exercise_seti_lab9.txt
+лб~10~и 10 DHCP.docx~DHCP@291 seti_lab10.txt
+лб~11~и 11 NAT.docx~NAT@291 exercise_seti_lab11.txt
+лб~12~и 12 Access List.docx~Access List@291 exercise_seti_lab12.txt
+лб~13~и 13 ASA.docx~ASA@291 seti_lab13.txt
+лб~14~и 14 DMZ часть 1.docx~DMZ часть 1@291 seti_lab14.txt
+лб~15~и 15 DMZ часть 2.docx~DMZ часть 2@291 exercise_seti_lab15.txt
+лб~16~и 16 Syslog NTP.docx~Syslog NTP@291 seti_lab16.txt
+лб~17~д 1.docx~71@
+лб~18~д 2.docx~72@
+лб~19~д 3.docx~73@
+лб~20~д 4.docx~74@
+лб~21~д 5.docx~75@
+лб~22~д 6.docx~76@
+лб~23~д 7.docx~77@
+лб~24~д 8.docx~78@

@@ -63,7 +63,8 @@ public class Raspisanie {//implements Comparable {
     }
 
     public Raspisanie(){}
-    public Raspisanie(String actiondate, int number, String template, Call call, Theme theme, Course course) {
+    public Raspisanie(Long id, String actiondate, int number, String template, Call call, Theme theme, Course course) {
+        this.id = id;
         this.actiondate = actiondate;
         this.number = number;
         this.template = template;

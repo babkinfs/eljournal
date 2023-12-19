@@ -27,9 +27,10 @@ public class RaspisanieService {
         if (call != null && course == null) {
             List<Raspisanie> raspisanieList = raspisanieRepos.findRaspisaniesByActiondateAndCall_Id(actiondate, call.getId());
             if (raspisanieList.size() == 0) {
-                Raspisanie raspisanie = new Raspisanie(actiondate, number, "", call, theme, course);
+                Raspisanie raspisanie = new Raspisanie(0L, actiondate, number, "", call, theme, course);
                 return raspisanieRepos.save(raspisanie);
             }
+            return raspisanieList.get(0);
         }
         if (call != null && course != null && theme != null) {
         //if (call != null && course != null) {
@@ -44,7 +45,7 @@ public class RaspisanieService {
                 raspisanieFromDB = raspisanieRepos.findRaspisanieByActiondateAndCall_IdAndCourse_Id(
                         actiondate, call.getId(), course.getId());
             }
-            Raspisanie raspisanie = new Raspisanie(actiondate, number, "", call, theme, course);
+            Raspisanie raspisanie = new Raspisanie(0L, actiondate, number, "", call, theme, course);
             if (raspisanieFromDB.size() == 0) {
                 return raspisanieRepos.save(raspisanie);
                 //return raspisanie;

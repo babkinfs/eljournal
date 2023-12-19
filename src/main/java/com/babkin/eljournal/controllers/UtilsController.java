@@ -143,7 +143,7 @@ public class UtilsController {
     }
     private Calendar calendar;
     public  String getDataNow(SimpleDateFormat dateFormat){
-        calendar = new GregorianCalendar(2023, Calendar.SEPTEMBER, 18 );//4 //11 //18
+        calendar = new GregorianCalendar(2024, Calendar.FEBRUARY, 12 );//4 //11 //18
         calendar.set(Calendar.HOUR, 8);//8 9 11 13
         calendar.set(Calendar.MINUTE, 42);
         calendar.set(Calendar.SECOND, 12);

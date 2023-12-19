@@ -621,6 +621,7 @@ public class TeacherController1 {
             teacherControllerService.calcRasp(session, model, name, number, modelForStart.getCourse(),
                     modelForStart.getCall(), modelForStart.getPeriodId(),
                     UtilsController.getTypeZbyIndex(typezId, 0), "", calc_fysgc, blockdate);
+            //model.addAttribute("activSohranit", false);
             return "nplanes";
         }
         if (razdel.equals("Варианты лаб.")) {

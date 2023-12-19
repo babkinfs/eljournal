@@ -966,6 +966,7 @@ public class TeacherControllerService {
 
     public List<DoubleString> calculate_raspisanie(int periodId, List<DoubleString> dates, String callName,
                                                    String calc_fysgc, int periodInt) {
+        // Вычисление дат в количестве из Period по индексу periodId с даты начала calc_fysgc со сдвигом в periodInt
         List<DoubleString> tempdates = new ArrayList<DoubleString>();
         String[] dt = null;
         dt = calc_fysgc.split( "-" );
@@ -1594,6 +1595,7 @@ public class TeacherControllerService {
 
         boolean addnewdates = false;
         Call value = (Call) session.getAttribute("oldCall");
+        //получим какое расписание на данный момент есть в базе
         raspisanies =  raspisanieService.findAllByCourse(course);
         if (raspisanies.size()==0) {
             if (value != null) {
@@ -1601,11 +1603,12 @@ public class TeacherControllerService {
                     call = value;
                 }
                 raspisanies = raspisanieService.findAllByCallAndCourseEmpty(call)
-                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getId(), rasp.getActiondate(), rasp.getNumber(), "",
                                 rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
             } else {
+                //List<Raspisanie> raspisanies222 =raspisanieService.findAll();
                 raspisanies = raspisanieService.findAll()
-                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                        .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getId(), rasp.getActiondate(), rasp.getNumber(), "",
                                 rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
                 if (raspisanies.size()>0) {
                     call = raspisanies.get(0).getCall();
@@ -1662,7 +1665,7 @@ public class TeacherControllerService {
             if ((addnewdates) || ((number == 999) && (!blockdate))) {// || (name.equals("dates"))) {
                 if (value != null) {
                     raspisanies = raspisanieService.findAllByCallAndCourseEmpty(value)
-                            .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getActiondate(), rasp.getNumber(), "",
+                            .stream().filter(rasp -> rasp.getCourse() == null).map(rasp -> new Raspisanie(rasp.getId(), rasp.getActiondate(), rasp.getNumber(), "",
                                     rasp.getCall(), rasp.getTheme(), rasp.getCourse())).collect(Collectors.toList());
                     dates = raspisanies.stream().map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
                             .sorted((o1, o2)->o1.compareTo(o2)).collect(Collectors.toList());
@@ -1709,7 +1712,18 @@ public class TeacherControllerService {
                     for (DoubleString item : dates){
                         Call call1 = callService.findByName(item.getSecond());
                         Raspisanie raspisanieSave = raspisanieService.save(item.getFirst(), 0, call1, null, null);
-                        raspisanies.add(raspisanieSave);
+                        //if (!(raspisanies.contains(raspisanieSave))) {
+                        //    raspisanies.add(raspisanieSave);
+                        //}
+                        boolean found = false;
+                        for (Raspisanie temp: raspisanies) {
+                            if (temp.getId() == raspisanieSave.getId()){
+                                found = true;
+                            }
+                        }
+                        if (!found){
+                            raspisanies.add(raspisanieSave);
+                        }
                     }
                 }else {
                     //while (firstIndex < firstCount) {
@@ -1780,7 +1794,7 @@ public class TeacherControllerService {
                 //}
                 //raspisanies = raspisanieService.findAllByCourse(course);
                 //raspisanies = findRaspisanie(course, null, null);
-                dates = raspisanies.stream().filter(rasp -> rasp.getCourse()==null)
+                dates = raspisanies.stream().filter(rasp -> rasp.getCourse()!=null)
                         .map(rasp -> new DoubleString(rasp.getActiondate(), rasp.getCall().getName()))
                         .collect(Collectors.toList());
             }

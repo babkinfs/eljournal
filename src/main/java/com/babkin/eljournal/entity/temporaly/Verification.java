@@ -142,9 +142,10 @@ public class Verification {
         int numberDouble = 0;
 
         String path = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-        int ind = path.lastIndexOf("\\");
+        ////int ind = path.lastIndexOf("\\");
         String allShablon = buffReader.readLine().trim().replaceAll("\\s{2,}", " ");
-        String path2 = basePath + "\\" + path.substring(0, ind) + "\\" + allShablon;
+        ////String path2 = basePath + "\\" + path.substring(0, ind) + "\\" + allShablon;
+        String path2 = basePath + "\\" + path + "\\" + allShablon;
         try {
             Reader reader2 = new FileReader(path2);
             BufferedReader buffReader2 = new BufferedReader(reader2);

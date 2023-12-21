@@ -89,8 +89,9 @@ public class RaspisanieService {
         if (course == null){
             return null;
         }
-        return raspisanieRepos.findAllByActiondateAndCourse_Id(actiondate,
-                course.getId());
+        long parm = course.getId();
+        List<Raspisanie> rrs = raspisanieRepos.findByActiondateAndCourse_Id(actiondate, parm);
+        return rrs;
     }
     public List<Raspisanie> findAllByCourse(Course course){
         if (course == null){

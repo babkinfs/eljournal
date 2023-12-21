@@ -143,8 +143,8 @@ public class UtilsController {
     }
     private Calendar calendar;
     public  String getDataNow(SimpleDateFormat dateFormat){
-        calendar = new GregorianCalendar(2024, Calendar.FEBRUARY, 12 );//4 //11 //18
-        calendar.set(Calendar.HOUR, 8);//8 9 11 13
+        calendar = new GregorianCalendar(2024, Calendar.FEBRUARY, 26 );//4 //12 //19 26
+        calendar.set(Calendar.HOUR, 9);//8 9 11 13
         calendar.set(Calendar.MINUTE, 42);
         calendar.set(Calendar.SECOND, 12);
         return dateFormat.format(calendar.getTime());

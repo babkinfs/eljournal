@@ -184,6 +184,11 @@ public class StudentController {
         if (fromteacher.equals("") || (fromteacher.equals("@"))) {
             switch (btn_prep) {
                 case "1": //Получить инструкцию
+                    if (copied.equals("")){
+                        model.addAttribute("message", "Не указан путь сохранения файла!");
+                        model.addAttribute("messageType", "danger");
+                        return "studentstart";
+                    }
                     outfile = studentControllerService.getInstruct(model, copied, student, smallRaspisanie.get(btn_out));
                     break;
                 case "2": //Отправить файл

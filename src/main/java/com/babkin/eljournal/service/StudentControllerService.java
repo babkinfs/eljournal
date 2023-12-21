@@ -105,7 +105,8 @@ public class StudentControllerService {
             //-1 до пары   0 во время пары   +1 после пары
             int tester = utilsController.comparison(para, time);
             if (tester == 0) {
-                if (raspisanie.getCourse().getGroupp().equals(groupp)) {
+                if ((raspisanie.getCourse().getGroupp().equals(groupp))
+                        || ((raspisanie.getCourse().getGroupp().getSubgroupp().getNamesubgroupp().equals("0")))) {
                     currentRaspisanie = raspisanie;
                 }
             }
@@ -152,7 +153,9 @@ public class StudentControllerService {
                     dnevnik = dnevnikList1.get(0);
 //                Dnevnik dnevnik = dnevnikService.addDnevnik(false, student, rasp);
                     filesForDnevnik = filesForDnevnikService.findeFilesForDnevnikAndKtocdal(FilesForDnevnikEnum.студент_сдал, dnevnik);
+                    //Обнаружил имя последнего файла, который был передан
                     if (filesForDnevnik != null && (filesForDnevnik.getOcenka() != null && filesForDnevnik.getOcenka().equals("Проверено, замечаний нет."))) {
+                        //отправляю сообщение что проверил и замечаний нет
                         dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, filesForDnevnik));
                         if (filesForDnevnik.getStatus().equals("отправил студенту")){
                             listOtpravOtv.add(filesForDnevnik);
@@ -164,7 +167,7 @@ public class StudentControllerService {
                         String subGrouppFilesForDnevnik = dnevnik.getRaspisanie().getCourse().getGroupp().getSubgroupp().getNamesubgroupp();
                         //18 08 23  if ((subGrouppFilesForDnevnik.equals(subGrouppStudent)) || (subGrouppFilesForDnevnik.equals("0"))) {
                         if (dnevnik.isVisiblebuttons() || dnevnik.getRaspisanie().getActiondate().equals(date)) {
-                            dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, null));
+                            dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, filesForDnevnik));//null));
                         }
                         //18 08 23  }
                     }
@@ -214,7 +217,7 @@ public class StudentControllerService {
                     groupp1 = groupService.findGrouppByNamegrouppAndFacultat_AndSemestr_AndYear_AndSubgroupp(
                             groupp.getNamegrouppOunly(), groupp.getFacultat(), semestr, groupp.getYear(), subgroupp);
                     if (groupp1 != null) {
-                        //studentList.addAll(studentService.findByGrouppId(groupp1));
+                        studentList.addAll(studentService.findByGrouppId(groupp1));
                     }
                 }
         //    }
@@ -314,7 +317,7 @@ public class StudentControllerService {
             fullnameCopied = copied + student.getLastname().getName() + " "
                     + student.getFirstname().getName().substring(0, 1) + ". " + student.getSecondname().getName().substring(0, 1)
                     + ". " + currentRaspisanie.getTheme().getTypezan() + currentRaspisanie.getTheme().getNumber() + " "
-                    + currentRaspisanie.getTheme().getNameteme() + ".docx";
+                    + currentRaspisanie.getTheme().getFileforstudent();
 
             model.addAttribute("fullnamecopied", fullnameCopied);
             if (currentRaspisanie.getTheme().getTypezan().equals("лаб")) {

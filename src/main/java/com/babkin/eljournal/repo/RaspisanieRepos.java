@@ -27,8 +27,9 @@ public interface RaspisanieRepos  extends JpaRepository<Raspisanie, Long> {
     @EntityGraph(attributePaths = { "call", "theme" })
     List<Raspisanie> findRaspisanieByTheme_Id(Long themeid);
 
-    @EntityGraph(attributePaths = { "theme", "call", "groupp", "groupp.subgroupp" })
-    List<Raspisanie> findAllByActiondateAndCourse_Id(String actiondate, Long courseid);
+    @EntityGraph(attributePaths = { "theme", "call"})//, "groupp" , "groupp.subgroupp" })
+    //List<Raspisanie> findAllByActiondateAndCourse_Id(String actiondate, Long courseid);
+    List<Raspisanie> findByActiondateAndCourse_Id(String actiondate, Long courseid);
     //@Query("SELECT e  FROM Raspisanie e order by e.number")
     @EntityGraph(attributePaths = { "theme", "call" })
     List<Raspisanie> findAllByCourse_Id(Long courseid);

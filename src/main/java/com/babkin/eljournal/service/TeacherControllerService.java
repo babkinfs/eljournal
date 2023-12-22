@@ -1956,10 +1956,10 @@ public class TeacherControllerService {
                     if (filesForDnevnik1.getOcenka() != null) {
                         if (!filesForDnevnik1.getOcenka().equals("Проверено, замечаний нет.")
                                 && !filesForDnevnik1.getOcenka().equals("Не отвечал")) {
-                            filesForDnevniks.add(filesForDnevnik1);
+                            //filesForDnevniks.add(filesForDnevnik1);
                         }
                     } else {
-                        if (!forProverka.equals("Ответ преподавателя готов к отправке")) {
+                        if (forProverka.equals("Ответ преподавателя готов к отправке")) {
                             filesForDnevniks.add(filesForDnevnik1);
                         }
                     }

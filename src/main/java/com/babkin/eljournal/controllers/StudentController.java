@@ -226,13 +226,18 @@ public class StudentController {
                 }
             }
         } else {
-            List<FilesForDnevnik> listOtpravOtv = (List<FilesForDnevnik>)model.getAttribute("listOtpravOtv");
-            FilesForDnevnik tempfilesForDnevnik = listOtpravOtv.get(btn_out);
-            tempfilesForDnevnik.setStatus("студент получил");
-            filesForDnevnikService.update(tempfilesForDnevnik);
-            outfile = fromteacher + "\\" + prepAddr.substring(prepAddr.indexOf(" "), prepAddr.length());
-            FileUtils.copyFile(new File(prepAddr), new File(outfile));
-            model.addAttribute("message", "Файл " + outfile + " получен!");
+            List<FilesForDnevnik> listOtpravOtv = (List<FilesForDnevnik>) model.getAttribute("listOtpravOtv");
+            if (listOtpravOtv == null) {
+                model.addAttribute("messageType", "danger");
+                model.addAttribute("message", "Файл отсутствует на сервере!");
+            } else {
+                FilesForDnevnik tempfilesForDnevnik = listOtpravOtv.get(btn_out);
+                tempfilesForDnevnik.setStatus("студент получил");
+                filesForDnevnikService.update(tempfilesForDnevnik);
+                outfile = fromteacher + "\\" + prepAddr.substring(prepAddr.indexOf(" "), prepAddr.length());
+                FileUtils.copyFile(new File(prepAddr), new File(outfile));
+                model.addAttribute("message", "Файл " + outfile + " получен!");
+            }
         }
         return "studentstart";
     }

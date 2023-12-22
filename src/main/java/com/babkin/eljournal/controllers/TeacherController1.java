@@ -1221,7 +1221,7 @@ public class TeacherController1 {
         //
         String forProverka = "forProverka";
         String value = (String) session.getAttribute("startProverka");
-        if (value != null && value.equals("true")) {
+        if (value != null && value.equals("true")) { //Начинаем с чистого листа при value = null
             String startProverkaNamefile = (String) session.getAttribute("startProverkaNamefile");
             model.addAttribute("messageType", "success");
             if (startProverkaNamefile != null) {
@@ -1241,7 +1241,10 @@ public class TeacherController1 {
         }
         String dttm = utilsController.getDataNow(new SimpleDateFormat("dd-MM-yyyy HH:mm") );
         model.addAttribute("aDateTime", dttm);
+
+        //В модели filesForDnevniks содержит все записи дневника, для проверки преподавателем
         teacherControllerService.proverka(model, user, dttm, forProverka);
+
         File uploadDir = new File(pathantwer);
         String[] list = uploadDir.list();
         //Проверить в рабочей папке PATH_ANSWER один или два файла
@@ -1370,9 +1373,10 @@ public class TeacherController1 {
 
         String answ = nameFile;
         String filenameOut = pathantwer + answ.replaceAll("\\\\", "   ");
-        //Пересылаем первый файл
+        //Пересылаем первый файл, который подготовлен студентом
         FileUtils.copyFile(new File(pathstudent[btn_out]), new File(filenameOut));// filenameOut == куда
         nameFile = nameFile.substring(0, nameFile.lastIndexOf("\\")).replaceAll("\\\\", "        ")+ leklab.substring(1);
+        //Формируем заготовку для файла ответа преподавателя
         answ = answ.replaceAll("\\\\", "_");
         //String namefileFound = lengthfilesfordnevnik[btn_out] + " " + answ.substring(0, answ.indexOf("~")) + ".docx";
         String namefileFound = answ.substring(0, answ.indexOf("~")) + ".docx";

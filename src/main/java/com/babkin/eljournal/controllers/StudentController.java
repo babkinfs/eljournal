@@ -138,6 +138,9 @@ public class StudentController {
                                @RequestParam("fullnamecop" )MultipartFile fullnamecop
     ) throws IOException, ParseException {
         //String fromteacher = "";
+        if (btn_prep.equals("3")){
+            prepAddr = fromteacher;
+        }
         prepAddr = prepAddr.replace(",", "");
         Student student = studentService.findByUser(user);
         Raspisanie currentRaspisanie = null;
@@ -149,7 +152,7 @@ public class StudentController {
             currentRaspisanie = studentControllerService.fillStudentHeader(model, user, btn_out, numberString[btn_out]);
             String nameSendFile = fullnamecop.getOriginalFilename();//.getName();
             //if ((nameSendFile.indexOf(".pdf")<0) || (nameSendFile.indexOf(".docx")<0)) {
-            if (nameSendFile.indexOf(".pdf")<0) {
+            if ((nameSendFile.indexOf(".pdf")<0) && (!btn_prep.equals("3"))) {
                 model.addAttribute("message", "Файл не отправлен, т.к.он не в формате pdf!");
                 model.addAttribute("messageType", "danger");
                 return "studentstart";

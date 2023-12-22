@@ -128,11 +128,17 @@
                             <div class="t">
                                 <#if (dnevnikAndFilesForDnevnik.filesForDnevnik)??>
                                     <#if (dnevnikAndFilesForDnevnik.filesForDnevnik.getPathteacher())??>
-                                        <input type="text" name="prepAddr"
-                                               value="${dnevnikAndFilesForDnevnik.filesForDnevnik.getPathteacher()}" />
+                                        <!--input type="text" name="prepAddr"
+                                               value="$        {dnevnikAndFilesForDnevnik.filesForDnevnik.getPathteacher()}" /-->
                                         <#if (dnevnikAndFilesForDnevnik.filesForDnevnik).getOcenka()??>
                                             <#if (dnevnikAndFilesForDnevnik.filesForDnevnik).getOcenka() == "" >
                                                 Вам пришло сообщение
+                                                <div class="list-group-item d-flex justify-content-between lh-sm">
+                                                    <div class="form-group row">
+                                                        Укажите путь чтобы получить ответ преподавателя&nbsp;&nbsp;&nbsp;&nbsp;
+                                                        <input type="text" name="fromteacher" value="" />
+                                                    </div>
+                                                </div>
                                                 <button id="btn_out3" name="btn_out" value="${index}"
                                                         class="btn btn-primary my-3" type="submit">Получить</button>
                                                 <input type="hidden" name="_csrf" value="${_csrf.token}">

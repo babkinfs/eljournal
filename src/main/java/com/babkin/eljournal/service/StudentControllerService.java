@@ -154,7 +154,8 @@ public class StudentControllerService {
 //                Dnevnik dnevnik = dnevnikService.addDnevnik(false, student, rasp);
                     filesForDnevnik = filesForDnevnikService.findeFilesForDnevnikAndKtocdal(FilesForDnevnikEnum.студент_сдал, dnevnik);
                     //Обнаружил имя последнего файла, который был передан
-                    if (filesForDnevnik != null && (filesForDnevnik.getOcenka() != null && filesForDnevnik.getOcenka().equals("Проверено, замечаний нет."))) {
+                    //21.12.2023 if (filesForDnevnik != null && (filesForDnevnik.getOcenka() != null && filesForDnevnik.getOcenka().equals("Проверено, замечаний нет."))) {
+                    if (filesForDnevnik != null){
                         //отправляю сообщение что проверил и замечаний нет
                         dnevnikList.add(new DnevnikAndFilesForDnevnik(dnevnik, filesForDnevnik));
                         if (filesForDnevnik.getStatus().equals("отправил студенту")){
